@@ -1,6 +1,8 @@
-﻿using System.Text.Json;
+﻿using System.Linq.Expressions;
+using System.Text.Json;
 using Laraue.PQL.Expressions;
 using Laraue.PQL.PdfObjects;
+using Laraue.PQL.PdfObjects.Interfaces;
 using Laraue.PQL.StageResults;
 using Laraue.PQL.Stages;
 using Laraue.PQL.TreeExecution;
@@ -22,7 +24,12 @@ public class QueryTests
         [
             new SelectStage
             {
-                Selector = Selector.Tables
+                SelectExpression = new PsqlApplySelectorExpression
+                {
+                    Selector = Selector.Tables,
+                    ObjectType = typeof(PdfDocument)
+                },
+                ObjectType = typeof(IHasTablesContainer)
             }, // PdfObjectContainer<object> -> PdfObjectContainer<Table>
             new FilterStage
             {
@@ -51,21 +58,46 @@ public class QueryTests
             }, // PdfObjectContainer<Table>[5] -> PdfObjectContainer<Table>[1]
             new SelectManyStage
             {
-                Selector = Selector.TableRows
+                SelectExpression = new PsqlApplySelectorExpression
+                {
+                    Selector = Selector.TableRows,
+                    ObjectType = typeof(IHasTableRowsContainer)
+                },
+                ObjectType = typeof(IHasTableRowsContainer)
             }, // PdfObjectContainer<Table>[1] -> PdfObjectContainer<TableRow>[8]
+            new ApplyMethodForEachElementStage
+            {
+                MethodCallExpression = new PsqlMethodCallExpression
+                {
+                    Object = new PsqlParameterExpression
+                    {
+                        ParameterName = "container",
+                        Type = typeof(PdfTableRow)
+                    },
+                    MethodName = "CellAt",
+                    MethodArguments = [new PsqlConstantExpression { Value = 1 }],
+                    ObjectType = typeof(PdfTableRow)
+                },
+                ObjectType = typeof(PdfTableRow)
+            }, // PdfObjectContainer<TableRow>[8] -> PdfObjectContainer<TableCell>[8]
+            
+            // TODO - correct way to divide apply on each element / elements container?
         ];
 
         var sp = new ServiceCollection()
+            .AddSingleton(new ExecutorOptions { HandleErrors = false })
             .AddSingleton<ExecutorFactory>()
             .AddSingleton<PSqlExpressionVisitorFactory>()
             .AddSingleton<Executor<StagesList>, StagesListExecutor>()
             .AddSingleton<Executor<SelectStage>, SelectStageExecutor>()
             .AddSingleton<Executor<SelectManyStage>, SelectManyStageExecutor>()
             .AddSingleton<Executor<FilterStage>, FilterStageExecutor>()
+            .AddSingleton<Executor<ApplyMethodForEachElementStage>, ApplyMethodStageExecutor>()
             .AddSingleton<PSqlExpressionVisitor<PsqlBinaryExpression>, PSqlBinaryExpressionVisitor>()
             .AddSingleton<PSqlExpressionVisitor<PsqlMethodCallExpression>, PSqlMethodCallExpressionVisitor>()
             .AddSingleton<PSqlExpressionVisitor<PsqlParameterExpression>, PSqlParameterExpressionVisitor>()
             .AddSingleton<PSqlExpressionVisitor<PsqlConstantExpression>, PSqlConstantExpressionVisitor>()
+            .AddSingleton<PSqlExpressionVisitor<PsqlApplySelectorExpression>, PsqlApplySelectorExpressionVisitor>()
             .BuildServiceProvider();
         
         var executor = sp.GetRequiredService<Executor<StagesList>>();

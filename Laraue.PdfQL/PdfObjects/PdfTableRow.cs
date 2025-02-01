@@ -15,4 +15,9 @@ public class PdfTableRow : PdfObject
     {
         return _cells.Select(c => c.GetText()).ToArray();
     }
+
+    public PdfCell CellAt(int index)
+    {
+        return new PdfCell(_cells.ElementAt(index));
+    }
 }

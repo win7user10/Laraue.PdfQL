@@ -18,6 +18,6 @@ public class PdfCell : PdfObject
     
     public override object ToJson()
     {
-        throw new NotImplementedException();
+        return _cell.GetText();
     }
 }

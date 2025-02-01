@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Laraue.PQL.Expressions;
 using Microsoft.Extensions.DependencyInjection;
+using NotImplementedException = System.NotImplementedException;
 
 namespace Laraue.PQL.TreeExecution.Expressions;
 
@@ -21,7 +22,8 @@ public class PSqlExpressionVisitorFactory
             PsqlConstantExpression psqlConstantExpression => Visit(psqlConstantExpression),
             PsqlMethodCallExpression psqlMethodCallExpression => Visit(psqlMethodCallExpression),
             PsqlParameterExpression psqlPropertyExpression => Visit(psqlPropertyExpression),
-            _ => throw new ArgumentOutOfRangeException(nameof(expression), expression, null)
+            PsqlApplySelectorExpression psqlApplySelectorExpression => Visit(psqlApplySelectorExpression),
+            _ => throw new NotImplementedException()
         };
     }
     

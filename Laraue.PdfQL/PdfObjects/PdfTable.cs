@@ -1,8 +1,9 @@
-﻿using Tabula;
+﻿using Laraue.PQL.PdfObjects.Interfaces;
+using Tabula;
 
 namespace Laraue.PQL.PdfObjects;
 
-public class PdfTable : PdfObject
+public class PdfTable : PdfObject, IHasTableRowsContainer
 {
     private readonly Table _table;
 

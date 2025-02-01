@@ -3,29 +3,28 @@ using Laraue.PQL.PdfObjects;
 using Laraue.PQL.StageResults;
 using Laraue.PQL.Stages;
 using Laraue.PQL.TreeExecution.Expressions;
-using InvalidCastException = System.InvalidCastException;
 
 namespace Laraue.PQL.TreeExecution;
 
-public class SelectManyStageExecutor : StageExecutor<SelectManyStage>
+public class ApplyMethodStageExecutor : StageExecutor<ApplyMethodForEachElementStage>
 {
     private readonly PSqlExpressionVisitorFactory _factory;
 
-    public SelectManyStageExecutor(PSqlExpressionVisitorFactory factory)
+    public ApplyMethodStageExecutor(PSqlExpressionVisitorFactory factory)
     {
         _factory = factory;
     }
 
-    public override StageResult Execute(StageResult currentValue, SelectManyStage stage)
+    public override StageResult Execute(StageResult currentValue, ApplyMethodForEachElementStage forEachElementStage)
     {
         if (currentValue is not PdfObjectStageResult { PdfObject: PdfObjectContainer pdfObjectContainer })
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Filter expression is available only on list of objects");
         }
         
-        var exp = _factory.Visit(stage.SelectExpression);
+        var exp = _factory.Visit(forEachElementStage.MethodCallExpression);
         
-        var parameter = Expression.Parameter(stage.ObjectType, "container");
+        var parameter = Expression.Parameter(forEachElementStage.ObjectType, "container");
         var replacer = new ParameterReplacer([parameter]);
         exp = replacer.Visit(exp);
 
@@ -40,12 +39,12 @@ public class SelectManyStageExecutor : StageExecutor<SelectManyStage>
         foreach (var pdfObject in pdfObjectContainer)
         {
             var localResult = action.DynamicInvoke(pdfObject)!;
-            if (localResult is not PdfObjectStageResult { PdfObject: PdfObjectContainer localResultContainer })
+            if (localResult is not PdfObject localResultObject)
             {
-                throw new InvalidOperationException("Attemp to make SelectMany on non of Container lists. May be Select stage required?");
+                throw new InvalidOperationException("Attempt to execute method on non PdfObject");
             }
             
-            result.AddRange(localResultContainer.Select(localResultContainer => localResultContainer));
+            result.Add(localResultObject);
         }
 
         return new PdfObjectStageResult(new PdfObjectContainer(result.ToArray()));
