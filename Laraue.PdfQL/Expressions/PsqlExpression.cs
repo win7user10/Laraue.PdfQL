@@ -1,4 +1,4 @@
-﻿namespace Laraue.PQL.Expressions;
+﻿namespace Laraue.PdfQL.Expressions;
 
 public class PsqlExpression
 {

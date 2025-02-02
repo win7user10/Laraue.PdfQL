@@ -1,4 +1,4 @@
-﻿namespace Laraue.PQL.TreeExecution;
+﻿namespace Laraue.PdfQL.TreeExecution;
 
 public class ExecutorOptions
 {

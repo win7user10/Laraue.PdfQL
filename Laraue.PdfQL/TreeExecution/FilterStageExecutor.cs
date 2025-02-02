@@ -1,10 +1,10 @@
 ﻿using System.Linq.Expressions;
-using Laraue.PQL.PdfObjects;
-using Laraue.PQL.StageResults;
-using Laraue.PQL.Stages;
-using Laraue.PQL.TreeExecution.Expressions;
+using Laraue.PdfQL.PdfObjects;
+using Laraue.PdfQL.StageResults;
+using Laraue.PdfQL.Stages;
+using Laraue.PdfQL.TreeExecution.Expressions;
 
-namespace Laraue.PQL.TreeExecution;
+namespace Laraue.PdfQL.TreeExecution;
 
 public class FilterStageExecutor : StageExecutor<FilterStage>
 {
@@ -27,7 +27,7 @@ public class FilterStageExecutor : StageExecutor<FilterStage>
         var predicateExpression = _factory.Visit(binaryExpression);
         
         // How to know what parameter to pass?
-        var parameter = Expression.Parameter(stage.ObjectType, "tables");
+        var parameter = Expression.Parameter(stage.ObjectType, "container");
         var replacer = new ParameterReplacer([parameter]);
         
         predicateExpression = replacer.Visit(predicateExpression);

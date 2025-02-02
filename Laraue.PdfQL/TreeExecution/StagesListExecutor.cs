@@ -1,8 +1,8 @@
-﻿using Laraue.PQL.StageResults;
-using Laraue.PQL.Stages;
+﻿using Laraue.PdfQL.StageResults;
+using Laraue.PdfQL.Stages;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Laraue.PQL.TreeExecution;
+namespace Laraue.PdfQL.TreeExecution;
 
 public class StagesListExecutor : StageExecutor<StagesList>
 {

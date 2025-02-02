@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Text;
 
-namespace Laraue.PQL.PdfObjects;
+namespace Laraue.PdfQL.PdfObjects;
 
 public class PdfObjectContainer : PdfObject, IEnumerable<PdfObject>
 {

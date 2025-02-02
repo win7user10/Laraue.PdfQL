@@ -1,6 +1,6 @@
 ﻿using Tabula;
 
-namespace Laraue.PQL.PdfObjects;
+namespace Laraue.PdfQL.PdfObjects;
 
 public class PdfTableRow : PdfObject
 {
@@ -16,8 +16,8 @@ public class PdfTableRow : PdfObject
         return _cells.Select(c => c.GetText()).ToArray();
     }
 
-    public PdfCell CellAt(int index)
+    public PdfTableCell CellAt(int index)
     {
-        return new PdfCell(_cells.ElementAt(index));
+        return new PdfTableCell(_cells.ElementAt(index));
     }
 }

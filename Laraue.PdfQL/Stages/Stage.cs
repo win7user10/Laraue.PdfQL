@@ -1,4 +1,4 @@
-﻿namespace Laraue.PQL.Stages;
+﻿namespace Laraue.PdfQL.Stages;
 
 public abstract class Stage
 {

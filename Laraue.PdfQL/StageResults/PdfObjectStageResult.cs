@@ -1,6 +1,6 @@
-﻿using Laraue.PQL.PdfObjects;
+﻿using Laraue.PdfQL.PdfObjects;
 
-namespace Laraue.PQL.StageResults;
+namespace Laraue.PdfQL.StageResults;
 
 public class PdfObjectStageResult : StageResult
 {

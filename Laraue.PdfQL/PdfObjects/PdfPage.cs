@@ -1,6 +1,6 @@
 ﻿using UglyToad.PdfPig.Content;
 
-namespace Laraue.PQL.PdfObjects;
+namespace Laraue.PdfQL.PdfObjects;
 
 public class PdfPage : PdfObject
 {

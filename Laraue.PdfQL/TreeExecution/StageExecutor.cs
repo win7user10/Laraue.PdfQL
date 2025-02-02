@@ -1,6 +1,6 @@
-﻿using Laraue.PQL.Stages;
+﻿using Laraue.PdfQL.Stages;
 
-namespace Laraue.PQL.TreeExecution;
+namespace Laraue.PdfQL.TreeExecution;
 
 public abstract class StageExecutor<TStage> : Executor<TStage>
     where TStage : Stage

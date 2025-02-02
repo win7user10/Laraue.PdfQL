@@ -1,7 +1,7 @@
-﻿using Laraue.PQL.PdfObjects;
+﻿using Laraue.PdfQL.PdfObjects;
 using Tabula;
 
-namespace Laraue.PQL.StageResults;
+namespace Laraue.PdfQL.StageResults;
 
 public static class StageResultExtensions
 {

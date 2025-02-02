@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
-using Laraue.PQL.Expressions;
+using Laraue.PdfQL.Expressions;
 using Microsoft.Extensions.DependencyInjection;
 using NotImplementedException = System.NotImplementedException;
 
-namespace Laraue.PQL.TreeExecution.Expressions;
+namespace Laraue.PdfQL.TreeExecution.Expressions;
 
 public class PSqlExpressionVisitorFactory
 {

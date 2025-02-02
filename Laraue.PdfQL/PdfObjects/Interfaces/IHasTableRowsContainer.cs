@@ -1,4 +1,4 @@
-﻿namespace Laraue.PQL.PdfObjects.Interfaces;
+﻿namespace Laraue.PdfQL.PdfObjects.Interfaces;
 
 public interface IHasTableRowsContainer
 {

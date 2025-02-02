@@ -1,6 +1,6 @@
-﻿using Laraue.PQL.StageResults;
+﻿using Laraue.PdfQL.StageResults;
 
-namespace Laraue.PQL.TreeExecution;
+namespace Laraue.PdfQL.TreeExecution;
 
 public abstract class Executor<TCommand>
 {

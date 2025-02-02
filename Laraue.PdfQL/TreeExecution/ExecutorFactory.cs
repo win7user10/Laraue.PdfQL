@@ -1,7 +1,7 @@
-﻿using Laraue.PQL.StageResults;
+﻿using Laraue.PdfQL.StageResults;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Laraue.PQL.TreeExecution;
+namespace Laraue.PdfQL.TreeExecution;
 
 public class ExecutorFactory
 {

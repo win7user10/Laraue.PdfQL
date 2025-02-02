@@ -1,8 +1,8 @@
-﻿using Laraue.PQL.PdfObjects.Interfaces;
+﻿using Laraue.PdfQL.PdfObjects.Interfaces;
 using Tabula;
 using UglyToad.PdfPig;
 
-namespace Laraue.PQL.PdfObjects;
+namespace Laraue.PdfQL.PdfObjects;
 
 public class PdfDocument : PdfObject, IHasTablesContainer
 {

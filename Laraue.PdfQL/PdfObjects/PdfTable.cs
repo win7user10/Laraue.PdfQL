@@ -1,7 +1,7 @@
-﻿using Laraue.PQL.PdfObjects.Interfaces;
+﻿using Laraue.PdfQL.PdfObjects.Interfaces;
 using Tabula;
 
-namespace Laraue.PQL.PdfObjects;
+namespace Laraue.PdfQL.PdfObjects;
 
 public class PdfTable : PdfObject, IHasTableRowsContainer
 {
@@ -23,9 +23,9 @@ public class PdfTable : PdfObject, IHasTableRowsContainer
         };
     }
 
-    public PdfCell CellAt(int index)
+    public PdfTableCell CellAt(int index)
     {
-        return new PdfCell(_table.Cells.ElementAt(index));
+        return new PdfTableCell(_table.Cells.ElementAt(index));
     }
     
     public PdfObjectContainer<PdfTableRow> GetTableRowsContainer()

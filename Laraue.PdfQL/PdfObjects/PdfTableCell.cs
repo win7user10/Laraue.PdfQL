@@ -1,12 +1,12 @@
 ﻿using Tabula;
 
-namespace Laraue.PQL.PdfObjects;
+namespace Laraue.PdfQL.PdfObjects;
 
-public class PdfCell : PdfObject
+public class PdfTableCell : PdfObject
 {
     private readonly Cell _cell;
 
-    public PdfCell(Cell cell)
+    public PdfTableCell(Cell cell)
     {
         _cell = cell;
     }

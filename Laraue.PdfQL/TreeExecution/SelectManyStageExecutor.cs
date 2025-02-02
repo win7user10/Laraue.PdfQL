@@ -1,11 +1,10 @@
 ﻿using System.Linq.Expressions;
-using Laraue.PQL.PdfObjects;
-using Laraue.PQL.StageResults;
-using Laraue.PQL.Stages;
-using Laraue.PQL.TreeExecution.Expressions;
-using InvalidCastException = System.InvalidCastException;
+using Laraue.PdfQL.PdfObjects;
+using Laraue.PdfQL.StageResults;
+using Laraue.PdfQL.Stages;
+using Laraue.PdfQL.TreeExecution.Expressions;
 
-namespace Laraue.PQL.TreeExecution;
+namespace Laraue.PdfQL.TreeExecution;
 
 public class SelectManyStageExecutor : StageExecutor<SelectManyStage>
 {

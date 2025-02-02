@@ -1,12 +1,10 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
-using Laraue.PQL.Expressions;
-using Laraue.PQL.PdfObjects;
-using Laraue.PQL.PdfObjects.Interfaces;
-using Laraue.PQL.StageResults;
-using Laraue.PQL.Stages;
+using Laraue.PdfQL.Expressions;
+using Laraue.PdfQL.PdfObjects.Interfaces;
+using Laraue.PdfQL.StageResults;
+using Laraue.PdfQL.Stages;
 
-namespace Laraue.PQL.TreeExecution.Expressions;
+namespace Laraue.PdfQL.TreeExecution.Expressions;
 
 public class PsqlApplySelectorExpressionVisitor : PSqlExpressionVisitor<PsqlApplySelectorExpression>
 {

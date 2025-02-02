@@ -1,6 +1,6 @@
 ﻿using Tabula.Extractors;
 
-namespace Laraue.PQL;
+namespace Laraue.PdfQL;
 
 public class Defaults
 {

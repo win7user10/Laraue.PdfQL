@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
-using Laraue.PQL.Expressions;
+using Laraue.PdfQL.Expressions;
 
-namespace Laraue.PQL.TreeExecution.Expressions;
+namespace Laraue.PdfQL.TreeExecution.Expressions;
 
 public class PSqlBinaryExpressionVisitor : PSqlExpressionVisitor<PsqlBinaryExpression>
 {

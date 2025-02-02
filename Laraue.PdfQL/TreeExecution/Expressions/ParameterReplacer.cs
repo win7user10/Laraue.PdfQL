@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Laraue.PQL.TreeExecution.Expressions;
+namespace Laraue.PdfQL.TreeExecution.Expressions;
 
 public class ParameterReplacer : ExpressionVisitor
 {

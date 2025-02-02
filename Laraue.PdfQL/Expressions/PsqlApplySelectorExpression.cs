@@ -1,6 +1,6 @@
-﻿using Laraue.PQL.Stages;
+﻿using Laraue.PdfQL.Stages;
 
-namespace Laraue.PQL.Expressions;
+namespace Laraue.PdfQL.Expressions;
 
 public class PsqlApplySelectorExpression : PsqlExpression
 {

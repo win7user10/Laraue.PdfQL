@@ -1,12 +1,14 @@
 ﻿using System.Linq.Expressions;
 using System.Text.Json;
-using Laraue.PQL.Expressions;
-using Laraue.PQL.PdfObjects;
-using Laraue.PQL.PdfObjects.Interfaces;
-using Laraue.PQL.StageResults;
-using Laraue.PQL.Stages;
-using Laraue.PQL.TreeExecution;
-using Laraue.PQL.TreeExecution.Expressions;
+using Laraue.PdfQL;
+using Laraue.PdfQL.Expressions;
+using Laraue.PdfQL.PdfObjects;
+using Laraue.PdfQL.PdfObjects.Interfaces;
+using Laraue.PdfQL.StageResults;
+using Laraue.PdfQL.Stages;
+using Laraue.PdfQL.TreeExecution;
+using Laraue.PdfQL.TreeExecution.Expressions;
+using Laraue.PdfQL.TreeExecution.Expressions.MethodCalls;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Laraue.PQL.UnitTests;
@@ -42,14 +44,14 @@ public class QueryTests
                         {
                             Object = new PsqlParameterExpression
                             {
-                                ParameterName = "tables",
+                                ParameterName = "container",
                                 Type = typeof(PdfTable)
                             },
                             MethodName = "CellAt",
                             MethodArguments = [new PsqlConstantExpression { Value = 4 }],
                             ObjectType = typeof(PdfTable)
                         },
-                        ObjectType = typeof(PdfCell)
+                        ObjectType = typeof(PdfTableCell)
                     },
                     Right = new PsqlConstantExpression { Value = "Лейкоциты (WBC)" },
                     Operator = PsqlOperand.Equal
@@ -80,27 +82,29 @@ public class QueryTests
                 },
                 ObjectType = typeof(PdfTableRow)
             }, // PdfObjectContainer<TableRow>[8] -> PdfObjectContainer<TableCell>[8]
-            
-            // TODO - correct way to divide apply on each element / elements container?
+            new FilterStage
+            {
+                BinaryExpression = new PsqlBinaryExpression
+                {
+                    Left = new PsqlMethodCallExpression
+                    {
+                        Object = new PsqlParameterExpression
+                        {
+                            ParameterName = "container",
+                            Type = typeof(PdfTableCell)
+                        },
+                        MethodName = "TryParse",
+                        MethodArguments = [new PsqlConstantExpression { Value = ScalarType.Float }],
+                        ObjectType = typeof(PdfTableCell)
+                    },
+                    Right = new PsqlConstantExpression { Value = true },
+                    Operator = PsqlOperand.Equal
+                },
+                ObjectType = typeof(PdfTableCell)
+            }, // PdfObjectContainer<TableCell>[8] -> PdfObjectContainer<TableCell>[7]
         ];
 
-        var sp = new ServiceCollection()
-            .AddSingleton(new ExecutorOptions { HandleErrors = false })
-            .AddSingleton<ExecutorFactory>()
-            .AddSingleton<PSqlExpressionVisitorFactory>()
-            .AddSingleton<Executor<StagesList>, StagesListExecutor>()
-            .AddSingleton<Executor<SelectStage>, SelectStageExecutor>()
-            .AddSingleton<Executor<SelectManyStage>, SelectManyStageExecutor>()
-            .AddSingleton<Executor<FilterStage>, FilterStageExecutor>()
-            .AddSingleton<Executor<ApplyMethodForEachElementStage>, ApplyMethodStageExecutor>()
-            .AddSingleton<PSqlExpressionVisitor<PsqlBinaryExpression>, PSqlBinaryExpressionVisitor>()
-            .AddSingleton<PSqlExpressionVisitor<PsqlMethodCallExpression>, PSqlMethodCallExpressionVisitor>()
-            .AddSingleton<PSqlExpressionVisitor<PsqlParameterExpression>, PSqlParameterExpressionVisitor>()
-            .AddSingleton<PSqlExpressionVisitor<PsqlConstantExpression>, PSqlConstantExpressionVisitor>()
-            .AddSingleton<PSqlExpressionVisitor<PsqlApplySelectorExpression>, PsqlApplySelectorExpressionVisitor>()
-            .BuildServiceProvider();
-        
-        var executor = sp.GetRequiredService<Executor<StagesList>>();
+        var executor = PdfQLInstance.GetTreeExecutor(new ExecutorOptions { HandleErrors = false });
         var sourceResult = new PdfObjectStageResult(pdfContainer);
         
         var stageResult = executor.Execute(sourceResult, new StagesList { Stages = stages });

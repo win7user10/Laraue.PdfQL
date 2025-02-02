@@ -1,6 +1,6 @@
-﻿using Laraue.PQL.Expressions;
+﻿using Laraue.PdfQL.Expressions;
 
-namespace Laraue.PQL.Stages;
+namespace Laraue.PdfQL.Stages;
 
 public class SelectManyStage : Stage
 {
