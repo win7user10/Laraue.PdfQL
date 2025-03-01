@@ -2,7 +2,7 @@
 
 namespace Laraue.PdfQL.Stages;
 
-public class ApplyMethodForEachElementStage : Stage
+public class MapStage : Stage
 {
     public required PsqlMethodCallExpression MethodCallExpression { get; init; }
     public required Type ObjectType { get; init; }

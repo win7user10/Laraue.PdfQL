@@ -6,7 +6,7 @@ using Laraue.PdfQL.TreeExecution.Expressions;
 
 namespace Laraue.PdfQL.TreeExecution;
 
-public class ApplyMethodStageExecutor : StageExecutor<ApplyMethodForEachElementStage>
+public class ApplyMethodStageExecutor : StageExecutor<MapStage>
 {
     private readonly PSqlExpressionVisitorFactory _factory;
 
@@ -15,7 +15,7 @@ public class ApplyMethodStageExecutor : StageExecutor<ApplyMethodForEachElementS
         _factory = factory;
     }
 
-    public override StageResult Execute(StageResult currentValue, ApplyMethodForEachElementStage forEachElementStage)
+    public override StageResult Execute(StageResult currentValue, MapStage forEachElementStage)
     {
         if (currentValue is not PdfObjectStageResult { PdfObject: PdfObjectContainer pdfObjectContainer })
         {

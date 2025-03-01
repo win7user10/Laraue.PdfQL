@@ -27,7 +27,7 @@ public class StagesListExecutor : StageExecutor<StagesList>
                     SelectStage selectStage => Execute(currentValue, selectStage),
                     SelectManyStage selectManyStage => Execute(currentValue, selectManyStage),
                     FilterStage filterStage => Execute(currentValue, filterStage),
-                    ApplyMethodForEachElementStage applyMethodStage => Execute(currentValue, applyMethodStage),
+                    MapStage applyMethodStage => Execute(currentValue, applyMethodStage),
                     _ => throw new NotImplementedException($"Stage {stageElement.GetType().Name} is not supported"),
                 };
             }

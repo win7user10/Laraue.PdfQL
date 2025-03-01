@@ -2,19 +2,50 @@
 using System.Text.Json;
 using Laraue.PdfQL;
 using Laraue.PdfQL.Expressions;
+using Laraue.PdfQL.Parser;
 using Laraue.PdfQL.PdfObjects;
 using Laraue.PdfQL.PdfObjects.Interfaces;
 using Laraue.PdfQL.StageResults;
 using Laraue.PdfQL.Stages;
 using Laraue.PdfQL.TreeExecution;
-using Laraue.PdfQL.TreeExecution.Expressions;
-using Laraue.PdfQL.TreeExecution.Expressions.MethodCalls;
-using Microsoft.Extensions.DependencyInjection;
+using Stage = Laraue.PdfQL.Stages.Stage;
 
 namespace Laraue.PQL.UnitTests;
 
 public class QueryTests
 {
+    [Fact]
+    public void PSqlSyntaxTree_ShouldCreatesCorrectly_WhenStagesJsonPassed()
+    {
+        var stagesJson = @"
+[
+	{
+		""$stage"": ""select"",
+		""selector"": ""tables""
+	},
+	{
+		""$stage"": ""filter"",
+		""expression"": ""$item.CellAt(4).Text() = 'Лейкоциты (WBC)'""
+	},
+	{
+		""$stage"": ""selectMany"",
+		""selector"": ""tableRows""
+	},
+	{
+		""$stage"": ""map"",
+		""expression"": ""$item.CellAt(1)""
+	},
+	{
+		""$stage"": ""filter"",
+		""expression"": ""$item.TryParse(float)""
+	}
+]";
+        
+        var result = PdfQLInstance
+            .GetTreeBuilder()
+            .ParseStages(stagesJson);
+    }
+    
     [Fact]
     public void PSqlSyntaxTree_ShouldWorkCorrectly_WhenStagesListPassed()
     {
@@ -32,7 +63,7 @@ public class QueryTests
                     ObjectType = typeof(PdfDocument)
                 },
                 ObjectType = typeof(IHasTablesContainer)
-            }, // PdfObjectContainer<object> -> PdfObjectContainer<Table>
+            }, // PdfObjectContainer<object> -> PdfObjectContainer<Table> // from pdf select tables as t
             new FilterStage
             {
                 BinaryExpression = new PsqlBinaryExpression
@@ -57,7 +88,7 @@ public class QueryTests
                     Operator = PsqlOperand.Equal
                 },
                 ObjectType = typeof(PdfTable)
-            }, // PdfObjectContainer<Table>[5] -> PdfObjectContainer<Table>[1]
+            }, // PdfObjectContainer<Table>[5] -> PdfObjectContainer<Table>[1] // where t.CellAt(4).Text() = "Лейкоциты (WBC)"
             new SelectManyStage
             {
                 SelectExpression = new PsqlApplySelectorExpression
@@ -66,8 +97,8 @@ public class QueryTests
                     ObjectType = typeof(IHasTableRowsContainer)
                 },
                 ObjectType = typeof(IHasTableRowsContainer)
-            }, // PdfObjectContainer<Table>[1] -> PdfObjectContainer<TableRow>[8]
-            new ApplyMethodForEachElementStage
+            }, // PdfObjectContainer<Table>[1] -> PdfObjectContainer<TableRow>[8] // from t select tableRows
+            new MapStage
             {
                 MethodCallExpression = new PsqlMethodCallExpression
                 {

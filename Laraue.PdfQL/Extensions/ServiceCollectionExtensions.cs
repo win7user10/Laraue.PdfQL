@@ -1,4 +1,6 @@
 ﻿using Laraue.PdfQL.Expressions;
+using Laraue.PdfQL.Parser;
+using Laraue.PdfQL.Parser.Visitors;
 using Laraue.PdfQL.Stages;
 using Laraue.PdfQL.TreeExecution;
 using Laraue.PdfQL.TreeExecution.Expressions;
@@ -19,7 +21,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<Executor<SelectStage>, SelectStageExecutor>()
             .AddSingleton<Executor<SelectManyStage>, SelectManyStageExecutor>()
             .AddSingleton<Executor<FilterStage>, FilterStageExecutor>()
-            .AddSingleton<Executor<ApplyMethodForEachElementStage>, ApplyMethodStageExecutor>()
+            .AddSingleton<Executor<MapStage>, ApplyMethodStageExecutor>()
             .AddSingleton<PSqlExpressionVisitor<PsqlBinaryExpression>, PSqlBinaryExpressionVisitor>()
             .AddSingleton<PSqlExpressionVisitor<PsqlMethodCallExpression>, PSqlMethodCallExpressionVisitor>()
             .AddSingleton<PSqlExpressionVisitor<PsqlParameterExpression>, PSqlParameterExpressionVisitor>()
@@ -29,5 +31,12 @@ public static class ServiceCollectionExtensions
             .AddKeyedSingleton<MethodCallVisitor, TryParseMethodCallVisitor>("TryParse")
             .AddKeyedSingleton<MethodCallVisitor, TextMethodCallVisitor>("Text")
             .AddKeyedSingleton<MethodCallVisitor, CellAtMethodCallVisitor>("CellAt");
+    }
+    
+    public static IServiceCollection AddParserServices(this IServiceCollection serviceCollection)
+    {
+        return serviceCollection
+            .AddSingleton<StageTokenVisitor<SelectStageToken>, SelectStageTokenVisitor>()
+            .AddSingleton<PdfExpressionParser>();
     }
 }
