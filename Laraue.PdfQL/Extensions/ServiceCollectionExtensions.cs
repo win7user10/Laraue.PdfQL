@@ -37,6 +37,7 @@ public static class ServiceCollectionExtensions
     {
         return serviceCollection
             .AddSingleton<StageTokenVisitor<SelectStageToken>, SelectStageTokenVisitor>()
+            .AddSingleton<StageTokenVisitor<FilterStageToken>, FilterStageTokenVisitor>()
             .AddSingleton<PdfExpressionParser>();
     }
 }
