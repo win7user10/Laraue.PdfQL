@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Laraue.PdfQL.Expressions;
@@ -8,7 +9,6 @@ namespace Laraue.PdfQL.Parser.Visitors;
 
 public static class Operands
 {
-    public const char StartParameter = '$';
     public const char Plus = '+';
     public const char Minus = '-';
     public const char Multiply = '*';
@@ -41,9 +41,11 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
         // How to represent regex here?
         ["<Argument>"] = "<String>|<Number>",
         ["<Arguments>"] = "<Argument>[<Comma><Argument>]?+",
-        ["<Parameter>"] = "<StartParameter><Word>",
+        ["<MethodCall>"] = "<Word><LeftBracket>[<Arguments>]?<RightBracket>",
+        ["<MemberAccess>"] = "<Word><Dot>",
+        
         ["<Expression>"] = "<MethodCallExpression>|<BinaryExpression>",
-        ["<MethodCallExpression>"] = "<Parameter><Dot><Word><LeftBracket>[<Arguments>]?<RightBracket>",
+        ["<MethodCallExpression>"] = "<MemberAccess><MethodCall>|<Expression><MethodCall>",
         ["<BinaryExpression>"] = "<Expression><Operand><Expression>",
     };
 
@@ -111,6 +113,10 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
         
         var tokens = ParseTokens(expression);
         var nodeList = GetChildrenNodes(tokens, new NextExactGrammar { Grammar = "<Expression>" });
+        if (!tokens.FullyParsed())
+        {
+            var nodeList2 = GetChildrenNodes(tokens, new NextExactGrammar { Grammar = "<Expression>" });
+        }
         
         // $item.CellAt(4).Text() = 'Лейкоциты (WBC)'
         
@@ -198,37 +204,6 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
         throw new InvalidSyntaxException($"Excepted {grammar.Grammar} in {tokenIterator}");
     }
 
-    private class TokenIterator
-    {
-        private readonly Token[] _tokens;
-        private int _index;
-        
-        private readonly Stack<int> _breakPoints = new();
-
-        public TokenIterator(Token[] tokens)
-        {
-            _tokens = tokens;
-        }
-        
-        public Token Current => _tokens.ElementAt(_index);
-        public void ToNext() => _index++;
-        
-        public void AddBreakPoint() => _breakPoints.Push(_index);
-        public void ResetBreakPoint() => _index = _breakPoints.Pop();
-        
-        public override string ToString()
-        {
-            var sb = new StringBuilder();
-            for (var i = 0; i < _tokens.Length; i++)
-            {
-                var v = _tokens[i];
-                sb.Append(i == _index ? $" -->{v.Type}<-- " : v.Type);
-            }
-            
-            return sb.ToString();
-        }
-    }
-
     private const char StartGrammar = '<';
     private const char EndGrammar = '>';
     private const char OrGrammar = '|';
@@ -265,8 +240,19 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
         return result.ToArray();
     }
     
-    private record struct NextOrGrammar(
-        string[] OrGrammars);
+    private record struct NextOrGrammar
+    {
+        public string[] OrGrammars { get; set; }
+        public NextOrGrammar(string[] OrGrammars)
+        {
+            this.OrGrammars = OrGrammars;
+        }
+
+        public override string ToString()
+        {
+            return string.Join("|", OrGrammars);
+        }
+    }
 
     private TokenIterator ParseTokens(ReadOnlySpan<char> input)
     {
