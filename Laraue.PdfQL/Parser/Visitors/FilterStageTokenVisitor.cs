@@ -1,47 +1,20 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Laraue.PdfQL.Expressions;
 using Laraue.PdfQL.Stages;
 
 namespace Laraue.PdfQL.Parser.Visitors;
 
-public static class Operands
-{
-    public const char Plus = '+';
-    public const char Minus = '-';
-    public const char Multiply = '*';
-    public const char Divider = '/';
-    public const char Equal = '=';
-    public const char LeftBracket = '(';
-    public const char RightBracket = ')';
-    public const char Comma = ',';
-    public const char Dot = '.';
-    public const char WhiteSpace = ' ';
-}
-
 public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
 {
     private const char StringToken = '\'';
 
-    public FilterStageTokenVisitor()
-    {
-        _tokens = typeof(Operands)
-            .GetFields(BindingFlags.Public | BindingFlags.Static)
-            .ToDictionary(field => (char)field.GetValue(null)!, field => $"<{field.Name}>");
-        
-        _tokenNames = _tokens.Values.ToHashSet();
-    }
-
-    private readonly Dictionary<char, string> _tokens;
-    private readonly HashSet<string> _tokenNames;
-    private static Dictionary<string, string> Grammar = new()
+    private static OrderedDictionary<string, string> Grammar = new()
     {
         // How to represent regex here?
+        ["<Arguments>"] = "<LeftBracket><Argument>[<Comma><Argument>]?+<RightBracket>",
         ["<Argument>"] = "<String>|<Number>",
-        ["<Arguments>"] = "<Argument>[<Comma><Argument>]?+",
-        ["<MethodCall>"] = "<Word><LeftBracket>[<Arguments>]?<RightBracket>",
+        ["<MethodCall>"] = "<Word><Arguments>",
         ["<MemberAccess>"] = "<Word><Dot>",
         
         ["<Expression>"] = "<MethodCallExpression>|<BinaryExpression>",
@@ -49,50 +22,7 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
         ["<BinaryExpression>"] = "<Expression><Operand><Expression>",
     };
 
-    private class Node
-    {
-        public string Value { get; set; } = string.Empty;
-        public List<Node> Children { get; set; } = [];
-
-        public string StringRepresentation
-        {
-            get
-            {
-                var sb = new StringBuilder();
-                AppendNodeName(sb, this, 0);
-                return sb.ToString();
-            }
-        }
-
-        private void AppendNodeName(StringBuilder stringBuilder, Node node, int currentDeepLevel)
-        {
-            if (currentDeepLevel > 0)
-            {
-                stringBuilder.Append(Environment.NewLine);
-            }
-            
-            for (var i = 0; i < currentDeepLevel * 2; i++)
-            {
-                stringBuilder.Append(' ');
-            }
-            
-            stringBuilder.Append($"{{{node.Value}}}");
-            AppendChildrenNodes(stringBuilder, node.Children, currentDeepLevel);
-        }
-        
-        private void AppendChildrenNodes(StringBuilder stringBuilder, List<Node> children, int currentDeepLevel)
-        {
-            foreach (var child in children)
-            {
-                AppendNodeName(stringBuilder, child, currentDeepLevel + 1);
-            }
-        }
-
-        public override string ToString()
-        {
-            return StringRepresentation;
-        }
-    }
+    
     
     public override Stage Visit(FilterStageToken token, ParseContext context)
     {
@@ -112,11 +42,7 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
         // each sub expression should deep the tree? BinaryExpression {  } ??
         
         var tokens = ParseTokens(expression);
-        var nodeList = GetChildrenNodes(tokens, new NextExactGrammar { Grammar = "<Expression>" });
-        if (!tokens.FullyParsed())
-        {
-            var nodeList2 = GetChildrenNodes(tokens, new NextExactGrammar { Grammar = "<Expression>" });
-        }
+        var nodeList = GetChildrenNodes2(tokens);
         
         // $item.CellAt(4).Text() = 'Лейкоциты (WBC)'
         
@@ -125,70 +51,95 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
         throw new NotImplementedException();
     }
 
-    private Node? GetChildrenNodes(TokenIterator tokenIterator, NextGrammar grammar)
+    private Node? GetChildrenNodes2(TokenTreeIterator tokenTreeIterator)
+    {
+        while (true)
+        {
+            var nextNode = tokenTreeIterator.GetNextNodeToReduce();
+            if (nextNode == null)
+            {
+                break;
+            }
+            
+            var nextIterator = new TokenTreeIterator(nextNode);
+            var processedNode = ProcessNextNode(nextIterator);
+            tokenTreeIterator.ReplaceNextNode(processedNode);
+        }
+        
+        Debug.WriteLine($"The final iterator is {tokenTreeIterator}");
+        throw new NotImplementedException();
+    }
+
+    private Node ProcessNextNode(TokenTreeIterator tokenTreeIterator)
+    {
+        foreach (var grammar in Grammar)
+        {
+            // Debug.WriteLine($"Looking for suitable grammar. Try: {grammar.Key}. Tokens should match: {grammar.Value}");
+            if (DoesMatchNode(tokenTreeIterator, grammar.Value))
+            {
+                Debug.WriteLine($"Node {grammar.Key} is chosen for {tokenTreeIterator}");
+                return new Node { Value = grammar.Key };
+            }
+
+            // Debug.WriteLine($"Grammar: {grammar.Key} does not match iterator tokens: {tokenTreeIterator}");
+            // Debug.WriteLine(string.Empty);
+        }
+
+        throw new InvalidSyntaxException($"Unknown tokens sequence {tokenTreeIterator}");
+    }
+
+    private bool DoesMatchNode(TokenTreeIterator tokenTreeIterator, string grammar)
+    {
+        var orGrammar = ParseNextOrGrammar(grammar);
+        for (var index = 0; index < orGrammar.OrGrammars.Length; index++)
+        {
+            tokenTreeIterator.AddBreakPoint();
+            var sequentialGrammar = orGrammar.OrGrammars[index];
+            
+            var sequentialGrammarParts = ParseSimpleGrammars(sequentialGrammar);
+            foreach (var sequentialGrammarPart in sequentialGrammarParts)
+            {
+                //Debug.WriteLine($"Try match next token: {sequentialGrammarPart.Grammar}");
+                var childNodeMatch = DoesMatchNode(tokenTreeIterator, sequentialGrammarPart);
+                if (childNodeMatch == false)
+                {
+                    //Debug.WriteLine($"No token found for: {sequentialGrammarPart.Grammar}");
+                    return false;
+                }
+                
+                if (tokenTreeIterator.AllNodesParsed())
+                {
+                    return true;
+                }
+                
+                tokenTreeIterator.ToNext();
+            }
+
+            if (tokenTreeIterator.AllNodesParsed())
+            {
+                return true;
+            }
+            
+            tokenTreeIterator.ResetBreakPoint();
+        }
+
+        return false;
+    }
+    
+    private bool DoesMatchNode(TokenTreeIterator tokenTreeIterator, NextGrammar grammar)
     {
         switch (grammar)
         {
-            case NextExactGrammar when Grammar.TryGetValue(grammar.Grammar, out var nextGrammar):
-            {
-                var parsed = ParseNextOrGrammar(nextGrammar);
-
-                for (var index = 0; index < parsed.OrGrammars.Length; index++)
-                {
-                    var orGrammar = parsed.OrGrammars[index];
-                    // TODO - it should be in tokens parser??
-                    tokenIterator.AddBreakPoint();
-
-                    Node? result = null;
-                    try
-                    {
-                        var simpleGrammars = ParseSimpleGrammars(orGrammar);
-                        foreach (var nextSimpleGrammar in simpleGrammars)
-                        {
-                            var child = GetChildrenNodes(tokenIterator, nextSimpleGrammar);
-                            if (child != null)
-                            {
-                                result ??= new Node { Value = grammar.Grammar };
-                                result.Children.Add(child);
-                            }
-                        }
-                    }
-                    catch (InvalidSyntaxException) when (index < parsed.OrGrammars.Length - 1)
-                    {
-                        // or grammar is not valid, but the next grammar can be correct. Continue the cycle.
-                        tokenIterator.ResetBreakPoint();
-                        continue;
-                    }
-
-                    // parsing is finished. Check excepted and real elements count. Return result
-                    if (result != null)
-                    {
-                        return result;
-                    }
-                    
-                    // No one token returned. Exception.
-                    tokenIterator.ResetBreakPoint();
-                    throw new InvalidSyntaxException("No one token found");
-                }
-
-                break;
-            }
+            case NextExactGrammar when Grammar.TryGetValue(grammar.Grammar, out var grammarDefinition):
+                // Debug.WriteLine($"Token: {grammar.Grammar} is consists of {grammarDefinition}");
+                return DoesMatchNode(tokenTreeIterator, grammarDefinition);
             case NextExactGrammar:
-            {
-                var tokenType = tokenIterator.Current.Type;
-                if (tokenType != grammar.Grammar)
-                {
-                    throw new InvalidSyntaxException($"Excepted {grammar.Grammar} in {tokenIterator}");
-                }
-            
-                tokenIterator.ToNext();
-                return new Node { Value = grammar.Grammar };
-            }
+                return true;
             case NextOnceOrNeverGrammar or NextAnyTimeGrammar:
-                tokenIterator.AddBreakPoint();
+                tokenTreeIterator.AddBreakPoint();
                 try
                 {
-                    return GetChildrenNodes(tokenIterator, new NextExactGrammar
+                    return DoesMatchNode(tokenTreeIterator, new NextExactGrammar
                     {
                         Grammar = grammar.Grammar,
                         RemainedString = grammar.RemainedString
@@ -196,12 +147,12 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
                 }
                 catch (InvalidSyntaxException)
                 {
-                    tokenIterator.ResetBreakPoint();
-                    return null;
+                    tokenTreeIterator.ResetBreakPoint();
+                    return false;
                 }
         }
-
-        throw new InvalidSyntaxException($"Excepted {grammar.Grammar} in {tokenIterator}");
+        
+        throw new Exception();
     }
 
     private const char StartGrammar = '<';
@@ -254,9 +205,10 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
         }
     }
 
-    private TokenIterator ParseTokens(ReadOnlySpan<char> input)
+    private TokenTreeIterator ParseTokens(ReadOnlySpan<char> input)
     {
-        var tokens = new List<Token>();
+        var result = new TokenTree();
+        
         var isStringStarted = false;
         var previousTokenIndex = 0;
         var lastNonWhiteSpaceIndex = 0;
@@ -281,7 +233,7 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
                 continue;
             }
             
-            if (!_tokens.ContainsKey(currentToken))
+            if (!Operands.ContainsOperand(currentToken))
             {
                 currentTokenIndex++;
                 lastNonWhiteSpaceIndex++;
@@ -299,26 +251,32 @@ public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
             if (!previousCharIsToken)
             {
                 var statement = new Range(previousTokenIndex, lastNonWhiteSpaceIndex);
-                tokens.Add(new Token(statement, GetTokenType(input[statement])));
+                result.AddToken(new Token
+                {
+                    Name = GetTokenType(input[statement]),
+                    Value = input[statement].ToString()
+                });
             }
             
             var token = new Range(currentTokenIndex, ++currentTokenIndex);
-            tokens.Add(new Token(token, _tokens[currentToken]));
+            result.AddToken(new Token
+            {
+                Name = Operands.NameOf(currentToken),
+                Value = input[token].ToString()
+            });
             
             previousTokenIndex = lastNonWhiteSpaceIndex = currentTokenIndex;
             previousCharIsToken = true;
         }
 
         var lastTokenRange = new Range(previousTokenIndex, new Index(0, true));
-        tokens.Add(new Token(lastTokenRange, GetTokenType(input[lastTokenRange])));
+        result.AddToken(new Token
+        {
+            Value = input[lastTokenRange].ToString(),
+            Name = GetTokenType(input[lastTokenRange])
+        });
 
-        return new TokenIterator(tokens.ToArray());
-    }
-
-    public struct Token(Range range, string type)
-    {
-        public Range Range { get; } = range;
-        public string Type { get; } = type;
+        return new TokenTreeIterator(result);
     }
 
     private static string GetTokenType(ReadOnlySpan<char> token)

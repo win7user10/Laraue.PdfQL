@@ -1,19 +1,47 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Text.Json;
 using Laraue.PdfQL;
 using Laraue.PdfQL.Expressions;
-using Laraue.PdfQL.Parser;
 using Laraue.PdfQL.PdfObjects;
 using Laraue.PdfQL.PdfObjects.Interfaces;
 using Laraue.PdfQL.StageResults;
 using Laraue.PdfQL.Stages;
 using Laraue.PdfQL.TreeExecution;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 using Stage = Laraue.PdfQL.Stages.Stage;
 
 namespace Laraue.PQL.UnitTests;
 
 public class QueryTests
 {
+    public QueryTests(ITestOutputHelper testOutputHelper)
+    {
+        Trace.Listeners.Add(new TraceListener1(testOutputHelper));
+    }
+
+    public class TraceListener1 : TraceListener
+    {
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public TraceListener1(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+        
+        public override void Write(string? message)
+        {
+            _testOutputHelper.WriteLine(message);
+        }
+
+        public override void WriteLine(string? message)
+        {
+            _testOutputHelper.WriteLine(message);
+        }
+    }
+    
     [Fact]
     public void PSqlSyntaxTree_ShouldCreatesCorrectly_WhenStagesJsonPassed()
     {
@@ -40,9 +68,7 @@ public class QueryTests
 		""expression"": ""$item.TryParse(float)""
 	}
 ]";
-        
-        var result = PdfQLInstance
-            .GetTreeBuilder()
+        var result = PdfQLInstance.GetTreeBuilder()
             .ParseStages(stagesJson);
     }
     
