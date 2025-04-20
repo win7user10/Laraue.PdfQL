@@ -34,6 +34,11 @@ public static class Operands
         return TokensByValue.ContainsKey(operand);
     }
     
+    public static bool ContainsOperand(string operandName)
+    {
+        return TokensByName.ContainsKey(operandName);
+    }
+    
     public static bool ContainsBinaryOperand(string operandName)
     {
         return TokensByName.TryGetValue(operandName, out var operandValue)

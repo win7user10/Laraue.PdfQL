@@ -2,6 +2,11 @@
 
 public class Token
 {
-    public required string Value { get; set; }
+    public Token(string value)
+    {
+        Value = value;
+    }
+
+    public string Value { get; set; }
     public required string Name { get; set; }
 }

@@ -211,10 +211,6 @@ public class TokenReader
 }
 
 public record OpenClosePair(char OpenCharacter, char? CloseCharacter, bool EnableNestedOpen);
-public record OpenClosePairState(OpenClosePair Pair, bool State)
-{
-    public bool State { get; set; } = State;
-}
 
 
 public abstract record NextGrammar
@@ -227,11 +223,14 @@ public record NextExactGrammar : NextGrammar
 {
 }
 
-public record NextOnceOrNeverGrammar : NextGrammar
+public record RegexGrammar : NextGrammar
 {
-    
 }
 
-public record NextAnyTimeGrammar : NextGrammar
+public record NextOnceOrNeverGrammar : RegexGrammar
+{
+}
+
+public record NextAnyTimeGrammar : RegexGrammar
 {
 }
