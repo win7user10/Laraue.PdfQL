@@ -1,0 +1,11 @@
+﻿namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
+
+public class GroupingExpr : Expr
+{
+    public GroupingExpr(Expr expr)
+    {
+        Expr = expr;
+    }
+
+    public Expr Expr { get; init; }
+}

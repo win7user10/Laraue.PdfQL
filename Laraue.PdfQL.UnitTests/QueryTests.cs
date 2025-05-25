@@ -3,6 +3,8 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using Laraue.PdfQL;
 using Laraue.PdfQL.Expressions;
+using Laraue.PdfQL.Parser.Visitors.Expressions.Parsing;
+using Laraue.PdfQL.Parser.Visitors.Expressions.Scanning;
 using Laraue.PdfQL.PdfObjects;
 using Laraue.PdfQL.PdfObjects.Interfaces;
 using Laraue.PdfQL.StageResults;
@@ -40,6 +42,24 @@ public class QueryTests
         {
             _testOutputHelper.WriteLine(message);
         }
+    }
+
+    [Fact]
+    public void ScannerTests()
+    {
+        var exp = "item => item.CellAt(4).Text() = \"Лейкоциты (WBC)\"";
+
+        var scanner = new Scanner();
+
+        var scanResult = scanner.ScanTokens(exp);
+
+        Assert.Empty(scanResult.Errors);
+
+        var parser = new Parser();
+        
+        var parseResult = parser.ParseEquality(scanResult.Tokens);
+        
+        Assert.Empty(parseResult.Errors);
     }
     
     [Fact]
