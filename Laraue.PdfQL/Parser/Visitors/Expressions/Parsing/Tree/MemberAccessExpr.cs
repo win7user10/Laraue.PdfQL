@@ -2,14 +2,14 @@
 
 namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
 
-public record UnaryExpr : Expr
+public record MemberAccessExpr : Expr
 {
-    public UnaryExpr(Token @operator, Expr expr)
+    public MemberAccessExpr(Expr expr, Token name)
     {
-        Operator = @operator;
         Expr = expr;
+        Name = name;
     }
 
-    public Token Operator { get; init; }
     public Expr Expr { get; init; }
+    public Token Name { get; init; }
 }

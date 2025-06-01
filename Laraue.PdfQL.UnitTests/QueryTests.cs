@@ -5,6 +5,7 @@ using Laraue.PdfQL;
 using Laraue.PdfQL.Expressions;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Parsing;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Scanning;
+using Laraue.PdfQL.Parser.Visitors.Expressions.Translating;
 using Laraue.PdfQL.PdfObjects;
 using Laraue.PdfQL.PdfObjects.Interfaces;
 using Laraue.PdfQL.StageResults;
@@ -47,7 +48,9 @@ public class QueryTests
     [Fact]
     public void ScannerTests()
     {
-        var exp = "item => item.CellAt(4).Text() = \"Лейкоциты (WBC)\"";
+        Expression<Func<PdfTable, string, bool>> native = (table, unused) => table.CellAt(4).Text() == "asd"; 
+        
+        var exp = "(item) => item.CellAt(4).Text() = \"Лейкоциты (WBC)\"";
 
         var scanner = new Scanner();
 
@@ -60,6 +63,10 @@ public class QueryTests
         var parseResult = parser.ParseEquality(scanResult.Tokens);
         
         Assert.Empty(parseResult.Errors);
+
+        var translator = new Translator();
+
+        translator.Translate(parseResult.Expression!);
     }
     
     [Fact]

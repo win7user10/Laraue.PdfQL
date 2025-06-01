@@ -1,6 +1,6 @@
 ﻿namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
 
-public class LiteralExpr : Expr
+public record LiteralExpr : Expr
 {
     public LiteralExpr(object? value)
     {

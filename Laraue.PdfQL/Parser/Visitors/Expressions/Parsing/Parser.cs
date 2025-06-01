@@ -21,7 +21,7 @@ internal class ParserImpl
     private readonly Token[] _tokens;
     private readonly List<ParseError> _errors = [];
     private int _current;
-    
+
     public ParserImpl(Token[] tokens)
     {
         _tokens = tokens;
@@ -64,16 +64,38 @@ internal class ParserImpl
     
     private Expr Equality()
     {
+        if (Match(TokenType.LeftBracket))
+            return Lambda();
+        
         var expr = Comparison();
-
+        
         while (Match(TokenType.Equal, TokenType.NotEqual))
         {
-            var operand = Previous().TokenType;
+            var @operator = Previous();
             var right = Term();
-            expr = new BinaryExpr(expr, operand, right);
+            expr = new BinaryExpr(expr, @operator, right);
         }
 
         return expr;
+    }
+    
+    private Expr Lambda()
+    {
+        var parameters = new List<Token>();
+        if (!Check(TokenType.RightBracket))
+        {
+            do
+            {
+                var parameter = Consume(TokenType.Identifier, "identifier expected.");
+                parameters.Add(parameter);
+            } while (Match(TokenType.Comma));
+        }
+        
+        Consume(TokenType.RightBracket, "Except ) after arguments list");
+        Consume(TokenType.Lambda, "Except => after arguments declaration");
+
+        var body = Expression();
+        return new LambdaExpr(parameters, body);
     }
     
     private Expr Comparison()
@@ -86,9 +108,9 @@ internal class ParserImpl
             TokenType.LessThan,
             TokenType.LessOrEqualThan))
         {
-            var operand = Previous().TokenType;
+            var @operator = Previous();
             var right = Term();
-            expr = new BinaryExpr(expr, operand, right);
+            expr = new BinaryExpr(expr, @operator, right);
         }
 
         return expr;
@@ -100,9 +122,9 @@ internal class ParserImpl
 
         while (Match(TokenType.Plus, TokenType.Minus))
         {
-            var operand = Previous().TokenType;
+            var @operator = Previous();
             var right = Factor();
-            expr = new BinaryExpr(expr, operand, right);
+            expr = new BinaryExpr(expr, @operator, right);
         }
 
         return expr;
@@ -114,9 +136,9 @@ internal class ParserImpl
 
         while (Match(TokenType.Multiply, TokenType.Divide))
         {
-            var operand = Previous().TokenType;
+            var @operator = Previous();
             var right = Unary();
-            expr = new BinaryExpr(expr, operand, right);
+            expr = new BinaryExpr(expr, @operator, right);
         }
         
         return expr;
@@ -125,19 +147,59 @@ internal class ParserImpl
     private Expr Unary()
     {
         if (!Match(TokenType.Not, TokenType.Minus))
-            return Primary();
+            return Call();
         
-        var operand = Previous().TokenType;
+        var @operator = Previous();
         var right = Unary();
 
-        return new UnaryExpr(operand, right);
+        return new UnaryExpr(@operator, right);
     }
-    
+
+    private Expr Call()
+    {
+        var expr = Primary();
+        
+        while (true)
+        {
+            if (Match(TokenType.LeftBracket))
+            {
+                expr = FinishCall(expr);
+            }
+            else if (Match(TokenType.Dot))
+            {
+                var name = Consume(TokenType.Identifier, "Except property name after '.'");
+                expr = new MemberAccessExpr(expr, name);
+            }
+            else
+            {
+                break;
+            }
+        }
+        
+        return expr;
+    }
+
+    private Expr FinishCall(Expr callee)
+    {
+        var arguments = new List<Expr>();
+        if (!Check(TokenType.RightBracket))
+        {
+            do
+            {
+                arguments.Add(Expression());
+            } while (Match(TokenType.Comma));
+        }
+
+        var paren = Consume(TokenType.RightBracket, "Except ) after arguments list");
+        return new MethodCallExpr(callee, paren, arguments);
+    }
+
     private Expr Primary()
     {
         if (Match(TokenType.False)) return new LiteralExpr(false);
         if (Match(TokenType.True)) return new LiteralExpr(true);
         if (Match(TokenType.Null)) return new LiteralExpr(null);
+        if (Match(TokenType.Identifier)) return new VariableExpr(Previous().Lexeme!);
         
         if (Match(TokenType.Number, TokenType.String))
             return new LiteralExpr(Previous().Literal);
