@@ -4,14 +4,14 @@ namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
 
 public record BinaryExpr : Expr
 {
-    public BinaryExpr(Expr expr, Token @operator, Expr right)
+    public BinaryExpr(Expr left, Token @operator, Expr right)
     {
-        Expr = expr;
+        Left = left;
         Operator = @operator;
         Right = right;
     }
 
-    public Expr Expr { get; init; }
+    public Expr Left { get; init; }
     public Token Operator { get; init; }
     public Expr Right { get; init; }
 }

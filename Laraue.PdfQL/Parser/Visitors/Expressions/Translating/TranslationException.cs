@@ -2,4 +2,7 @@
 
 public class TranslationException : Exception
 {
+    protected TranslationException(string message)
+        : base(message)
+    {}
 }

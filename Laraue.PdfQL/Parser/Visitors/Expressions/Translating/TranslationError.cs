@@ -1,7 +1,9 @@
-﻿namespace Laraue.PdfQL.Parser.Visitors.Expressions.Translating;
+﻿using Laraue.PdfQL.Parser.Visitors.Expressions.Scanning;
+
+namespace Laraue.PdfQL.Parser.Visitors.Expressions.Translating;
 
 public class TranslationError
 {
-    public int Position { get; set; }
+    public Token? Token { get; set; }
     public required string Error { get; set; }
 }

@@ -167,6 +167,7 @@ internal class ParserImpl
             }
             else if (Match(TokenType.Dot))
             {
+                // Here is wrong translation, may be method call
                 var name = Consume(TokenType.Identifier, "Except property name after '.'");
                 expr = new MemberAccessExpr(expr, name);
             }

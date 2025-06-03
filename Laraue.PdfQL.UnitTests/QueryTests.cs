@@ -66,7 +66,11 @@ public class QueryTests
 
         var translator = new Translator();
 
-        translator.Translate(parseResult.Expression!);
+        var translationResult = translator.Translate(
+            parseResult.Expression!,
+            new TranslationContext { ParameterTypes = { typeof(PdfTable) }});
+        
+        Assert.Empty(translationResult.Errors);
     }
     
     [Fact]

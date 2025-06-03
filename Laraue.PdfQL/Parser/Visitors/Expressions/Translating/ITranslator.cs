@@ -4,5 +4,5 @@ namespace Laraue.PdfQL.Parser.Visitors.Expressions.Translating;
 
 public interface ITranslator
 {
-    TranslationResult Translate(Expr expr);
+    TranslationResult Translate(Expr expr, TranslationContext translationContext);
 }

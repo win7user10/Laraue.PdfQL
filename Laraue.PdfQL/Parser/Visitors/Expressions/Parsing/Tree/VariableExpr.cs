@@ -1,4 +1,6 @@
-﻿namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
+﻿using Laraue.PdfQL.Parser.Visitors.Expressions.Scanning;
+
+namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
 
 public record VariableExpr : Expr
 {
