@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using Laraue.PdfQL;
 using Laraue.PdfQL.Expressions;
+using Laraue.PdfQL.Parser.Visitors;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Parsing;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Scanning;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Translating;
@@ -48,8 +49,6 @@ public class QueryTests
     [Fact]
     public void ScannerTests()
     {
-        Expression<Func<PdfTable, string, bool>> native = (table, unused) => table.CellAt(4).Text() == "asd"; 
-        
         var exp = "(item) => item.CellAt(4).Text() = \"Лейкоциты (WBC)\"";
 
         var scanner = new Scanner();
@@ -60,9 +59,41 @@ public class QueryTests
 
         var parser = new Parser();
         
-        var parseResult = parser.ParseEquality(scanResult.Tokens);
+        var parseResult = parser.ParseStatement(scanResult.Tokens);
         
         Assert.Empty(parseResult.Errors);
+
+        var translator = new Translator();
+
+        var translationResult = translator.Translate(
+            parseResult.Expression!,
+            new TranslationContext { ParameterTypes = { typeof(PdfTable) }});
+        
+        Assert.Empty(translationResult.Errors);
+    }
+    
+    [Fact]
+    public void Scanner2Tests()
+    {
+        var pipeline = @"
+select(tables)
+	->filter((item) => item.CellAt(4).Text() = 'Лейкоциты (WBC)')
+	->selectMany(tableRows)
+	->map((item) => item.CellAt(1))
+	->filter((item) => item.TryParse(float))";
+        
+        var scanner = new Scanner();
+
+        var scanResult = scanner.ScanTokens(pipeline);
+
+        Assert.Empty(scanResult.Errors);
+
+        var parser = new Parser();
+        
+        var parseResult = parser.ParseStatement(scanResult.Tokens);
+        
+        Assert.Empty(parseResult.Errors);
+        Assert.NotNull(parseResult.Expression);
 
         var translator = new Translator();
 
@@ -84,7 +115,7 @@ public class QueryTests
 	},
 	{
 		""$stage"": ""filter"",
-		""expression"": ""$item.CellAt(4).Text() = 'Лейкоциты (WBC)'""
+		""expression"": ""(item) => item.CellAt(4).Text() = 'Лейкоциты (WBC)'""
 	},
 	{
 		""$stage"": ""selectMany"",
@@ -92,11 +123,11 @@ public class QueryTests
 	},
 	{
 		""$stage"": ""map"",
-		""expression"": ""$item.CellAt(1)""
+		""expression"": ""(item) => item.CellAt(1)""
 	},
 	{
 		""$stage"": ""filter"",
-		""expression"": ""$item.TryParse(float)""
+		""expression"": ""(item) => item.TryParse('float')""
 	}
 ]";
         var result = PdfQLInstance.GetTreeBuilder()
@@ -123,27 +154,6 @@ public class QueryTests
             }, // PdfObjectContainer<object> -> PdfObjectContainer<Table> // from pdf select tables as t
             new FilterStage
             {
-                BinaryExpression = new PsqlBinaryExpression
-                {
-                    Left = new PsqlMethodCallExpression
-                    {
-                        MethodName = "Text",
-                        Object = new PsqlMethodCallExpression
-                        {
-                            Object = new PsqlParameterExpression
-                            {
-                                ParameterName = "container",
-                                Type = typeof(PdfTable)
-                            },
-                            MethodName = "CellAt",
-                            MethodArguments = [new PsqlConstantExpression { Value = 4 }],
-                            ObjectType = typeof(PdfTable)
-                        },
-                        ObjectType = typeof(PdfTableCell)
-                    },
-                    Right = new PsqlConstantExpression { Value = "Лейкоциты (WBC)" },
-                    Operator = PsqlOperand.Equal
-                },
                 ObjectType = typeof(PdfTable)
             }, // PdfObjectContainer<Table>[5] -> PdfObjectContainer<Table>[1] // where t.CellAt(4).Text() = "Лейкоциты (WBC)"
             new SelectManyStage
@@ -172,22 +182,6 @@ public class QueryTests
             }, // PdfObjectContainer<TableRow>[8] -> PdfObjectContainer<TableCell>[8]
             new FilterStage
             {
-                BinaryExpression = new PsqlBinaryExpression
-                {
-                    Left = new PsqlMethodCallExpression
-                    {
-                        Object = new PsqlParameterExpression
-                        {
-                            ParameterName = "container",
-                            Type = typeof(PdfTableCell)
-                        },
-                        MethodName = "TryParse",
-                        MethodArguments = [new PsqlConstantExpression { Value = ScalarType.Float }],
-                        ObjectType = typeof(PdfTableCell)
-                    },
-                    Right = new PsqlConstantExpression { Value = true },
-                    Operator = PsqlOperand.Equal
-                },
                 ObjectType = typeof(PdfTableCell)
             }, // PdfObjectContainer<TableCell>[8] -> PdfObjectContainer<TableCell>[7]
         ];

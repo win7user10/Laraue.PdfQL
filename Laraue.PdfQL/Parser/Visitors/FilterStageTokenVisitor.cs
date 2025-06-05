@@ -7,10 +7,12 @@ namespace Laraue.PdfQL.Parser.Visitors;
 
 public class FilterStageTokenVisitor : StageTokenVisitor<FilterStageToken>
 {
-    private const char StringToken = '\'';
+    private readonly Interpreter _interpreter = new();
     
     public override Stage Visit(FilterStageToken token, ParseContext context)
     {
+        var expression = _interpreter.ParseBinary(token.Expression);
+        
         var stage = new FilterStage
         {
             BinaryExpression = null!,

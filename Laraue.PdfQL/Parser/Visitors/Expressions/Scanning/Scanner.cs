@@ -16,6 +16,8 @@ public sealed class Scanner : IScanner
         private int _currentPosition;
         private readonly List<Token> _tokens = new ();
         private readonly List<ScanError> _errors = new ();
+        
+        private const char StringStart = '\'';
 
         public ScannerImplementation(string input)
         {
@@ -45,12 +47,18 @@ public sealed class Scanner : IScanner
             switch (nextChar)
             {
                 case ' ': break;
+                case '\r': 
+                    PopNextCharIf(c => c == '\n');
+                    break;
+                case '\t':
+                    break;
                 case '(': AddToken(TokenType.LeftBracket); break;
                 case ')': AddToken(TokenType.RightBracket); break;
                 case ',': AddToken(TokenType.Comma); break;
                 case '.': AddToken(TokenType.Dot); break;
                 case '+': AddToken(TokenType.Plus); break;
-                case '-': AddToken(TokenType.Minus); break;
+                case '-': 
+                    AddToken(PopNextCharIf(c => c == '>') ? TokenType.NextPipeline : TokenType.Minus); break;
                 case '/': AddToken(TokenType.Divide); break;
                 case '*': AddToken(TokenType.Multiply); break;
                 case '=':
@@ -61,7 +69,7 @@ public sealed class Scanner : IScanner
                     AddToken(PopNextCharIf(c => c == '=') ? TokenType.LessOrEqualThan : TokenType.LessThan); break;
                 case '>':
                     AddToken(PopNextCharIf(c => c == '=') ? TokenType.GreaterOrEqualThan : TokenType.GreaterThan); break;
-                case '"': AddString(); break;
+                case StringStart: AddString(); break;
                     
                 default:
                     if (IsDigit(nextChar))
@@ -79,7 +87,7 @@ public sealed class Scanner : IScanner
 
         private void AddString()
         {
-            while (TryPeekNextChar(out var nextChar) && nextChar != '"' && !IsScanCompleted)
+            while (TryPeekNextChar(out var nextChar) && nextChar != StringStart && !IsScanCompleted)
             {
                 Advance();
             }
@@ -113,8 +121,8 @@ public sealed class Scanner : IScanner
             }
             
             AddToken(
-                TokenType.Number,
-                double.Parse(_input[_startPosition.._currentPosition]));
+                TokenType.Integer,
+                int.Parse(_input[_startPosition.._currentPosition]));
         }
         
         private void AddIdentifier()

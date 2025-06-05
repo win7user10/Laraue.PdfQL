@@ -53,7 +53,7 @@ public class TranslatorImpl
         {
             LambdaExpr lambdaExpr => LambdaExpression(lambdaExpr),
             BinaryExpr binaryExpr => BinaryExpression(binaryExpr),
-            MethodCallExpr methodCallExpr => MethodCallExpression(methodCallExpr),
+            InstanceMethodCallExpr instanceMethodCallExpr => InstanceMethodCallExpression(instanceMethodCallExpr),
             MemberAccessExpr memberAccessExpr => MemberAccessExpression(memberAccessExpr),
             VariableExpr variableExpr => VariableExpression(variableExpr),
             LiteralExpr literalExpr => LiteralExpression(literalExpr),
@@ -99,28 +99,36 @@ public class TranslatorImpl
         return System.Linq.Expressions.Expression.MakeBinary(type, left, right);
     }
 
-    private Expression? MethodCallExpression(MethodCallExpr expr)
+    private Expression? InstanceMethodCallExpression(InstanceMethodCallExpr expr)
     {
         try
         {
-            var callee = Expression(expr.Callee);
-            var calleeType = _environment.GetType(expr.Paren.Lexeme!);
+            var callee = Expression(expr.Object);
+            if (callee == null)
+            {
+                return null;
+            }
+            
+            // Check method signature
+            var methodInfo = callee.Type.GetMethod(expr.Method.Lexeme!);
+            if (methodInfo == null)
+            {
+                _errors.Add(new TranslationError { Error = "Invalid method name", Token = expr.Method });
+                return null;
+            }
             
             var arguments = new List<Expression?>();
             foreach (var argument in expr.Arguments)
-            {
                 arguments.Add(Expression(argument));
-            }
         
-            if (callee == null || arguments.Any(a => a == null))
+            if (arguments.Any(a => a == null))
                 return null;
 
-            throw new NotImplementedException();
-            // return System.Linq.Expressions.Expression.Call(callee)
+            return System.Linq.Expressions.Expression.Call(callee, methodInfo, arguments.Cast<Expression>());
         }
         catch (TranslationException e)
         {
-            _errors.Add(new TranslationError { Error = e.Message, Token = expr.Paren });
+            _errors.Add(new TranslationError { Error = e.Message });
             return null;
         }
     }

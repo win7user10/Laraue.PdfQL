@@ -9,11 +9,6 @@ public class Parser : IParser
     {
         return new ParserImpl(tokens).ParseStatement();
     }
-
-    public ParseResult ParseEquality(Token[] tokens)
-    {
-        return new ParserImpl(tokens).ParseEquality();
-    }
 }
 
 internal class ParserImpl
@@ -21,6 +16,7 @@ internal class ParserImpl
     private readonly Token[] _tokens;
     private readonly List<ParseError> _errors = [];
     private int _current;
+    private static readonly string[] TableSelectors = ["tables", "tableRows"];
 
     public ParserImpl(Token[] tokens)
     {
@@ -29,32 +25,101 @@ internal class ParserImpl
 
     public ParseResult ParseStatement()
     {
-        return Parse(Expression);
+        return Parse();
     }
     
-    public ParseResult ParseEquality()
-    {
-        return Parse(Equality);
-    }
-    
-    public ParseResult Parse(Func<Expr> getExpression)
+    public ParseResult Parse()
     {
         try
         {
-            var expression = getExpression();
+            var stages = Stages();
             return new ParseResult
             {
-                Expression = expression,
+                Stages = stages,
                 Errors = _errors.ToArray()
             };
         }
-        catch (ParseException)
+        catch (ParseException e)
         {
+            _errors.Add(new ParseError { Error = $"Unhandled error: {e.Message}", Token = _tokens[_current], Position = 0 });
+            
             return new ParseResult
             {
                 Errors = _errors.ToArray()
             };
         }
+    }
+
+    private List<Stage> Stages()
+    {
+        var stages = new List<Stage>();
+        
+        while (Match(TokenType.Identifier))
+        {
+            var stageName = Previous();
+            Consume(TokenType.LeftBracket, "'(' excepted after stage definition.");
+
+            switch (stageName.Lexeme)
+            {
+                case "select":
+                    stages.Add(SelectStage());
+                    break;
+                case "filter":
+                    stages.Add(FilterStage());
+                    break;
+                case "selectMany":
+                    stages.Add(SelectManyStage());
+                    break;
+                default:
+                    Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'");
+                    break;
+            };
+            
+            Consume(TokenType.RightBracket, "')' excepted after stage definition.");
+            if (!Match(TokenType.NextPipeline))
+            {
+                break;
+            }
+        }
+        
+        return stages;
+    }
+    
+    private SelectStage SelectStage()
+    {
+        var selector = ConsumePdfSelector();
+        
+        return new SelectStage(selector);
+    }
+    
+    private FilterStage FilterStage()
+    {
+        var expr = Equality();
+
+        return new FilterStage(expr);
+    }
+    
+    private SelectManyStage SelectManyStage()
+    {
+        var selector = ConsumePdfSelector();
+        
+        return new SelectManyStage(selector);
+    }
+
+    private PdfElement ConsumePdfSelector()
+    {
+        var errorText = $"One of {string.Join(", ", TableSelectors)} excepted.";
+        var token = Consume(TokenType.Identifier, errorText);
+        if (!TableSelectors.Contains(token.Lexeme))
+        {
+            Error(token, errorText);
+        }
+        
+        return token.Lexeme switch
+        {
+            "tables" => PdfElement.Table,
+            "tableRows" => PdfElement.TableRow,
+        };
     }
 
     private Expr Expression()
@@ -161,15 +226,11 @@ internal class ParserImpl
         
         while (true)
         {
-            if (Match(TokenType.LeftBracket))
+            if (Match(TokenType.Dot))
             {
-                expr = FinishCall(expr);
-            }
-            else if (Match(TokenType.Dot))
-            {
-                // Here is wrong translation, may be method call
-                var name = Consume(TokenType.Identifier, "Except property name after '.'");
-                expr = new MemberAccessExpr(expr, name);
+                var propertyName = Consume(TokenType.Identifier, "Except property or method name after '.'");
+                Consume(TokenType.LeftBracket, "'(' excepted");
+                expr = FinishCall(expr, propertyName);
             }
             else
             {
@@ -180,7 +241,7 @@ internal class ParserImpl
         return expr;
     }
 
-    private Expr FinishCall(Expr callee)
+    private Expr FinishCall(Expr callee, Token methodToken)
     {
         var arguments = new List<Expr>();
         if (!Check(TokenType.RightBracket))
@@ -191,8 +252,8 @@ internal class ParserImpl
             } while (Match(TokenType.Comma));
         }
 
-        var paren = Consume(TokenType.RightBracket, "Except ) after arguments list");
-        return new MethodCallExpr(callee, paren, arguments);
+        Consume(TokenType.RightBracket, "Except ) after arguments list");
+        return new InstanceMethodCallExpr(callee, arguments, methodToken);
     }
 
     private Expr Primary()
@@ -202,7 +263,7 @@ internal class ParserImpl
         if (Match(TokenType.Null)) return new LiteralExpr(null);
         if (Match(TokenType.Identifier)) return new VariableExpr(Previous().Lexeme!);
         
-        if (Match(TokenType.Number, TokenType.String))
+        if (Match(TokenType.Integer, TokenType.String))
             return new LiteralExpr(Previous().Literal);
 
         if (!Match(TokenType.LeftBracket))

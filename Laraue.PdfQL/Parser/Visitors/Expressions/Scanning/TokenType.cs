@@ -4,7 +4,7 @@ public enum TokenType
 {
     Identifier,
     String,
-    Number,
+    Integer,
     
     Comma,
     Dot,
@@ -29,6 +29,7 @@ public enum TokenType
     False,
     True,
     Null,
+    NextPipeline,
     
     Eof,
 }
