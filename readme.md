@@ -25,10 +25,11 @@ var pdfContainer = new PdfDocument(pdfBytes);
 
 Define the operations sequence
 ```
-select(tables)
-	->filter((item) => item.CellAt(4).Text() = 'Summary')
-	->selectMany(tableRows)
-	->map((item) => item.CellAt(1))
+var psql = @"
+    select(tables)
+        ->filter((item) => item.CellAt(4).Text() = 'Лейкоциты (WBC)')
+        ->selectMany(tableRows)
+        ->map((item) => item.CellAt(1))";
 ```
 
 Run the tree execution
@@ -37,5 +38,5 @@ var pdfBytes = File.ReadAllBytes("document.pdf");
 var pdfContainer = new PdfDocument(pdfBytes);
         
 var executor = new PSqlExecutor();
-var result = executor.ExecutePsql(pipeline, pdfContainer);
+var result = executor.ExecutePsql(psql, pdfContainer);
 ```

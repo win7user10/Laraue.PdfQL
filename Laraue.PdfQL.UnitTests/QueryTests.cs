@@ -38,7 +38,7 @@ public class QueryTests
     [Fact]
     public void ScannerTests()
     {
-        var pipeline = @"
+        var psql = @"
 select(tables)
 	->filter((item) => item.CellAt(4).Text() = 'Лейкоциты (WBC)')
 	->selectMany(tableRows)
@@ -48,7 +48,7 @@ select(tables)
         var pdfContainer = new PdfDocument(pdfBytes);
         
         var executor = new PSqlExecutor();
-        var result = executor.ExecutePsql(pipeline, pdfContainer);
+        var result = executor.ExecutePsql(psql, pdfContainer);
 
         Assert.NotNull(result);
     }
