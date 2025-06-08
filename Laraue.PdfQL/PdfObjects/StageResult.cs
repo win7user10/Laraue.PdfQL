@@ -3,18 +3,18 @@ using System.Text;
 
 namespace Laraue.PdfQL.PdfObjects;
 
-public class PdfObjectContainer : PdfObject, IEnumerable<PdfObject>
+public class StageResult : PdfObject, IEnumerable<object>
 {
-    private readonly PdfObject[] _values;
+    private readonly object[] _values;
 
-    public PdfObjectContainer(PdfObject[] values)
+    public StageResult(object[] values)
     {
         _values = values;
     }
 
-    public IEnumerator<PdfObject> GetEnumerator()
+    public IEnumerator<object> GetEnumerator()
     {
-        return _values.Cast<PdfObject>().GetEnumerator();
+        return _values.Cast<object>().GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -36,13 +36,12 @@ public class PdfObjectContainer : PdfObject, IEnumerable<PdfObject>
     }
 }
 
-public class PdfObjectContainer<TPdfObject> : PdfObjectContainer, IEnumerable<TPdfObject>
-    where TPdfObject : PdfObject
+public class StageResult<TPdfObject> : StageResult, IEnumerable<TPdfObject>
 {
     private readonly TPdfObject[] _values;
 
-    public PdfObjectContainer(TPdfObject[] values)
-        : base(values.Cast<PdfObject>().ToArray())
+    public StageResult(TPdfObject[] values)
+        : base(values.Cast<object>().ToArray())
     {
         _values = values;
     }

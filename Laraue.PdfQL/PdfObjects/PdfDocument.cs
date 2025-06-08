@@ -18,7 +18,7 @@ public class PdfDocument : PdfObject, IHasTablesContainer
         return $"PdfDocument {SourceDocument.Information}";
     }
 
-    public PdfObjectContainer<PdfTable> GetTablesContainer()
+    public StageResult<PdfTable> GetTablesContainer()
     {
         var tables = SourceDocument.GetPages()
             .SelectMany(p =>
@@ -29,6 +29,6 @@ public class PdfDocument : PdfObject, IHasTablesContainer
             .Select(t => new PdfTable(t))
             .ToArray();
 
-        return new PdfObjectContainer<PdfTable>(tables);
+        return new StageResult<PdfTable>(tables);
     }
 }

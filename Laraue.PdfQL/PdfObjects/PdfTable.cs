@@ -17,9 +17,9 @@ public class PdfTable : PdfObject, IHasTableRowsContainer
         return new PdfTableCell(_table.Cells.ElementAt(index));
     }
     
-    public PdfObjectContainer<PdfTableRow> GetTableRowsContainer()
+    public StageResult<PdfTableRow> GetTableRowsContainer()
     {
-        return new PdfObjectContainer<PdfTableRow>(GetTableRows());
+        return new StageResult<PdfTableRow>(GetTableRows());
     }
     
     public PdfTableRow[] GetTableRows()

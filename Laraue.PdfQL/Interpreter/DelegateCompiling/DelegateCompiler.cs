@@ -13,11 +13,11 @@ public class DelegateCompiler : IDelegateCompiler
 {
     public DelegateCompilingResult Compile(Stage[] stages)
     {
-        return new TypeResolverImpl(stages).Compile();
+        return new DelegateCompilerImpl(stages).Compile();
     }
 }
 
-internal class TypeResolverImpl
+internal class DelegateCompilerImpl
 {
     private readonly Stage[] _stages;
     private Type _currentType;
@@ -27,7 +27,7 @@ internal class TypeResolverImpl
 
     private readonly ExpressionCompiler _expressionCompiler = new();
 
-    public TypeResolverImpl(Stage[] stages)
+    public DelegateCompilerImpl(Stage[] stages)
     {
         _stages = stages;
         _currentType = typeof(PdfDocument);
@@ -76,8 +76,8 @@ internal class TypeResolverImpl
             switch (stage.SelectElement)
             {
                 case PdfElement.Table:
-                    MapStageElement<IHasTablesContainer, PdfObjectContainer<PdfTable>>(c => c.GetTablesContainer());
-                    _currentType = typeof(PdfObjectContainer<PdfTable>);
+                    MapStageElement<IHasTablesContainer, StageResult<PdfTable>>(c => c.GetTablesContainer());
+                    _currentType = typeof(StageResult<PdfTable>);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -101,11 +101,11 @@ internal class TypeResolverImpl
             {
                 case PdfElement.Table:
                     ApplyToEachElementAndUseSelectMany<IHasTablesContainer, PdfTable>(c => c.GetTablesContainer());
-                    _currentType = typeof(PdfObjectContainer<PdfTable>);
+                    _currentType = typeof(StageResult<PdfTable>);
                     break;
                 case PdfElement.TableRow:
                     ApplyToEachElementAndUseSelectMany<IHasTableRowsContainer, PdfTableRow>(c => c.GetTableRowsContainer());
-                    _currentType = typeof(PdfObjectContainer<PdfTableRow>);
+                    _currentType = typeof(StageResult<PdfTableRow>);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -182,7 +182,6 @@ internal class TypeResolverImpl
     
     private void ApplyMapToEachContainerElement<TContainerElement, TResult>(Func<TContainerElement, TResult> @delegate)
         where TContainerElement : PdfObject
-        where TResult : PdfObject
     {
         SetNextStageResult<TContainerElement, TResult>(elements =>
         {
@@ -241,7 +240,6 @@ internal class TypeResolverImpl
 
     private void SetNextStageResult<TContainerElement, TResultElement>(
         Func<IEnumerable<TContainerElement>, IEnumerable<TResultElement>> @delegate)
-        where TResultElement : PdfObject
     {
         var resultRef = _result;
         _result = document =>
@@ -255,7 +253,7 @@ internal class TypeResolverImpl
 
             var nextResult = @delegate(enumerable);
 
-            return new PdfObjectContainer<TResultElement>(nextResult.ToArray());
+            return new StageResult<TResultElement>(nextResult.ToArray());
         };
     }
 

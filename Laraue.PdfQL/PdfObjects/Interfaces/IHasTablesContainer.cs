@@ -2,5 +2,5 @@
 
 public interface IHasTablesContainer
 {
-    public PdfObjectContainer<PdfTable> GetTablesContainer();
+    public StageResult<PdfTable> GetTablesContainer();
 }
