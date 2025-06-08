@@ -7,5 +7,5 @@ public class SelectManyStage : Stage
         SelectElement = selectElement;
     }
 
-    PdfElement SelectElement { get; set; }
+    public PdfElement SelectElement { get; set; }
 }

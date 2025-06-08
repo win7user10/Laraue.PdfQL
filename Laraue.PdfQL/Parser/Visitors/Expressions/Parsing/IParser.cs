@@ -4,5 +4,5 @@ namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing;
 
 public interface IParser
 {
-    ParseResult ParseStatement(Token[] tokens);
+    ParseResult Parse(Token[] tokens);
 }

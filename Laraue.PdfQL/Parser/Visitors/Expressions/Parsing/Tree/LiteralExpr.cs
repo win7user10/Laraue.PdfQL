@@ -8,4 +8,11 @@ public record LiteralExpr : Expr
     }
 
     public object? Value { get; init; }
+
+    public override string ToString()
+    {
+        return Value is string
+            ? $"'{Value}'"
+            : Value?.ToString() ?? "null";
+    }
 }

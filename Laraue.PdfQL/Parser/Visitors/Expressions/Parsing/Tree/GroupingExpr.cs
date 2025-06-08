@@ -8,4 +8,9 @@ public record GroupingExpr : Expr
     }
 
     public Expr Expr { get; init; }
+
+    public override string ToString()
+    {
+        return $"({Expr})";
+    }
 }

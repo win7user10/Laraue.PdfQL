@@ -1,46 +1,43 @@
 ﻿using System.Linq.Expressions;
+using System.Text;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Scanning;
+using Laraue.PdfQL.TreeExecution.Expressions;
 
-namespace Laraue.PdfQL.Parser.Visitors.Expressions.Translating;
+namespace Laraue.PdfQL.Parser.Visitors.Expressions.DelegateCompiling.Expressions;
 
-public class Translator : ITranslator
+public class ExpressionCompiler
 {
-    public TranslationResult Translate(Expr expr, TranslationContext translationContext)
+    public ExpressionCompileResult Compile(Expr expr, ExpressionCompilerContext context)
     {
-        return new TranslatorImpl(translationContext).Translate(expr);
+        return new TranslatorImpl(context).Translate(expr);
     }
-}
-
-public class TranslationContext
-{
-    public List<Type> ParameterTypes { get; } = new();
 }
 
 public class TranslatorImpl
 {
-    private readonly List<TranslationError> _errors = new();
-    private readonly TranslationContext _translationContext;
+    private readonly List<ExpressionCompileError> _errors = new();
+    private readonly ExpressionCompilerContext _translationContext;
     private readonly Environment _environment = new ();
 
-    public TranslatorImpl(TranslationContext translationContext)
+    public TranslatorImpl(ExpressionCompilerContext translationContext)
     {
         _translationContext = translationContext;
     }
 
-    public TranslationResult Translate(Expr expr)
+    public ExpressionCompileResult Translate(Expr expr)
     {
         try
         {
-            return new TranslationResult
+            return new ExpressionCompileResult
             {
                 Expression = Expression(expr),
                 Errors = _errors.ToArray()
             };
         }
-        catch (TranslationException)
+        catch (ExpressionCompileException)
         {
-            return new TranslationResult
+            return new ExpressionCompileResult
             {
                 Errors = _errors.ToArray()
             };
@@ -67,24 +64,39 @@ public class TranslatorImpl
         if (expr.Parameters.Count > _translationContext.ParameterTypes.Count)
         {
             var firstWrongParameter = expr.Parameters[_translationContext.ParameterTypes.Count + 1];
-            _errors.Add(new TranslationError { Error = "Invalid parameters count", Token = firstWrongParameter });
+            _errors.Add(new ExpressionCompileError { Error = "Invalid parameters count", Token = firstWrongParameter });
 
             return null;
         }
+        
+        var paremeters = new List<ParameterExpression>();
         
         // Parameters resolving
         for (var index = 0; index < expr.Parameters.Count; index++)
         {
             var parameter = expr.Parameters[index];
-            if (!_environment.TryDefine(parameter.Lexeme!, _translationContext.ParameterTypes[index]))
+            var parameterName = parameter.Lexeme!;
+            var parameterType = _translationContext.ParameterTypes[index];
+            
+            if (!_environment.TryDefine(parameterName, parameterType))
             {
-                _errors.Add(new TranslationError { Error = "Parameter with the same name already defined", Token = parameter });
+                _errors.Add(new ExpressionCompileError { Error = "Parameter with the same name already defined", Token = parameter });
                 return null;
             }
+            
+            paremeters.Add(System.Linq.Expressions.Expression.Parameter(parameterType, parameterName));
         }
 
         // Make the further translation
-        return Expression(expr.Body);
+        var body = Expression(expr.Body);
+        if (body == null)
+        {
+            return null;
+        }
+
+        var lambda = System.Linq.Expressions.Expression.Lambda(body, paremeters);
+        var replacer = new ParameterReplacer(paremeters);
+        return (LambdaExpression) replacer.Visit(lambda);
     }
 
     private Expression? BinaryExpression(BinaryExpr expr)
@@ -113,7 +125,11 @@ public class TranslatorImpl
             var methodInfo = callee.Type.GetMethod(expr.Method.Lexeme!);
             if (methodInfo == null)
             {
-                _errors.Add(new TranslationError { Error = "Invalid method name", Token = expr.Method });
+                _errors.Add(new ExpressionCompileError
+                {
+                    Error = $"Method is not found on {GetReadableTypeName(callee.Type)}",
+                    Token = expr.Method
+                });
                 return null;
             }
             
@@ -126,9 +142,9 @@ public class TranslatorImpl
 
             return System.Linq.Expressions.Expression.Call(callee, methodInfo, arguments.Cast<Expression>());
         }
-        catch (TranslationException e)
+        catch (ExpressionCompileException e)
         {
-            _errors.Add(new TranslationError { Error = e.Message });
+            _errors.Add(new ExpressionCompileError { Error = e.Message });
             return null;
         }
     }
@@ -147,7 +163,7 @@ public class TranslatorImpl
         }
         catch (Exception e)
         {
-            _errors.Add(new TranslationError { Error = e.Message});
+            _errors.Add(new ExpressionCompileError { Error = e.Message});
             return null;
         }
     }
@@ -175,5 +191,18 @@ public class TranslatorImpl
             TokenType.LessOrEqualThan => ExpressionType.LessThanOrEqual,
             _ => throw new NotSupportedException(tokenType.ToString())
         };
+    }
+
+    private string GetReadableTypeName(Type type)
+    {
+        var sb = new StringBuilder(type.Name);
+        if (type.IsGenericType)
+        {
+            sb.Append("[");
+            sb.Append(string.Join(",", type.GenericTypeArguments.Select(a => a.Name)));
+            sb.Append("]");
+        }
+
+        return sb.ToString();
     }
 }

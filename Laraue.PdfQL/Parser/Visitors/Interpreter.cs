@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Parsing;
 using Laraue.PdfQL.Parser.Visitors.Expressions.Scanning;
-using Laraue.PdfQL.Parser.Visitors.Expressions.Translating;
 using Laraue.PdfQL.PdfObjects;
 
 namespace Laraue.PdfQL.Parser.Visitors;
@@ -10,7 +9,6 @@ public class Interpreter
 {
     private readonly Scanner _scanner = new ();
     private readonly Expressions.Parsing.Parser _parser = new ();
-    private readonly Translator _translator = new ();
 
     public BinaryExpression ParseBinary(string expression)
     {
@@ -27,17 +25,19 @@ public class Interpreter
         if (scanResult.HasErrors)
             throw new Exception(string.Join<ScanError>(", ", scanResult.Errors));
 
-        var parseResult = _parser.ParseStatement(scanResult.Tokens);
+        var parseResult = _parser.Parse(scanResult.Tokens);
         if (parseResult.HasErrors)
             throw new Exception(string.Join<ParseError>(", ", parseResult.Errors));
 
-        var translationResult = _translator.Translate(
+        /*var translationResult = _translator.Translate(
             parseResult.Expression!,
             new TranslationContext { ParameterTypes = { typeof(PdfTable) }});
         
         if (translationResult.HasErrors)
             throw new Exception(string.Join<TranslationError>(", ", translationResult.Errors));
 
-        return translationResult.Expression!;
+        return translationResult.Expression!;*/
+
+        return null!;
     }
 }

@@ -7,5 +7,10 @@ public class SelectStage : Stage
         SelectElement = selectElement;
     }
 
-    PdfElement SelectElement { get; set; }
+    public PdfElement SelectElement { get; set; }
+
+    public override string ToString()
+    {
+        return $"select({SelectElement})";
+    }
 }

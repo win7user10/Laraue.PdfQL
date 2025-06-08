@@ -1,4 +1,4 @@
-﻿namespace Laraue.PdfQL.Parser.Visitors.Expressions.Translating;
+﻿namespace Laraue.PdfQL.Parser.Visitors.Expressions.DelegateCompiling.Expressions;
 
 public class Environment
 {

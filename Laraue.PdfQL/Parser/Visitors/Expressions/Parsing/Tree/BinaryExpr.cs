@@ -14,4 +14,9 @@ public record BinaryExpr : Expr
     public Expr Left { get; init; }
     public Token Operator { get; init; }
     public Expr Right { get; init; }
+
+    public override string ToString()
+    {
+        return $"{Left} {Operator.Lexeme} {Right}";
+    }
 }

@@ -8,4 +8,9 @@ public class FilterStage : Stage
     }
 
     public Expr Filter { get; set; }
+
+    public override string ToString()
+    {
+        return $"filter({Filter})";
+    }
 }

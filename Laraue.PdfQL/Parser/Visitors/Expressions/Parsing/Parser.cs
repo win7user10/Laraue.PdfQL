@@ -5,7 +5,7 @@ namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing;
 
 public class Parser : IParser
 {
-    public ParseResult ParseStatement(Token[] tokens)
+    public ParseResult Parse(Token[] tokens)
     {
         return new ParserImpl(tokens).ParseStatement();
     }
@@ -45,7 +45,8 @@ internal class ParserImpl
             
             return new ParseResult
             {
-                Errors = _errors.ToArray()
+                Errors = _errors.ToArray(),
+                Stages = new List<Stage>()
             };
         }
     }
@@ -69,6 +70,9 @@ internal class ParserImpl
                     break;
                 case "selectMany":
                     stages.Add(SelectManyStage());
+                    break;
+                case "map":
+                    stages.Add(MapStage());
                     break;
                 default:
                     Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'");
@@ -104,6 +108,13 @@ internal class ParserImpl
         var selector = ConsumePdfSelector();
         
         return new SelectManyStage(selector);
+    }
+    
+    private MapStage MapStage()
+    {
+        var projection = Expression();
+        
+        return new MapStage(projection);
     }
 
     private PdfElement ConsumePdfSelector()

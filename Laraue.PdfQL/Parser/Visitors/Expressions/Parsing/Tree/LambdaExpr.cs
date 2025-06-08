@@ -12,4 +12,10 @@ public record LambdaExpr : Expr
 
     public List<Token> Parameters { get; init; }
     public Expr Body { get; init; }
+
+    public override string ToString()
+    {
+        var parameters = string.Join(", ", Parameters.Select(p => p.Lexeme));
+        return $"({parameters}) => {Body}";
+    }
 }

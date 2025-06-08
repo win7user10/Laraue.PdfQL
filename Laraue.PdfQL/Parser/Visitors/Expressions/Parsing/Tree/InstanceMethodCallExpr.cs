@@ -14,4 +14,10 @@ public record InstanceMethodCallExpr : Expr
     public Expr Object { get; set; }
     public List<Expr> Arguments { get; set; }
     public Token Method { get; set; }
+
+    public override string ToString()
+    {
+        var arguments = string.Join(", ", Arguments.Select(a => a.ToString()));
+        return $"{Object}.{Method.Lexeme}({arguments})";
+    }
 }

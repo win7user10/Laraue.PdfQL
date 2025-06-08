@@ -1,6 +1,4 @@
-﻿using Laraue.PdfQL.Parser.Visitors.Expressions.Scanning;
-
-namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
+﻿namespace Laraue.PdfQL.Parser.Visitors.Expressions.Parsing.Tree;
 
 public record VariableExpr : Expr
 {
@@ -10,4 +8,9 @@ public record VariableExpr : Expr
     }
 
     public string Name { get; init; }
+
+    public override string ToString()
+    {
+        return $"${Name}";
+    }
 }
