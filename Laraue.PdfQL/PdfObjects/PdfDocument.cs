@@ -12,11 +12,6 @@ public class PdfDocument : PdfObject, IHasTablesContainer
     {
         SourceDocument = UglyToad.PdfPig.PdfDocument.Open(pdfBytes, new ParsingOptions { ClipPaths = true });
     }
-    
-    public override object ToJson()
-    {
-        throw new NotImplementedException();
-    }
 
     public override string ToString()
     {

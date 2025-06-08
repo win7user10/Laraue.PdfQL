@@ -11,11 +11,6 @@ public class PdfTableRow : PdfObject
         _cells = cells;
     }
 
-    public override object ToJson()
-    {
-        return _cells.Select(c => c.GetText()).ToArray();
-    }
-
     public PdfTableCell CellAt(int index)
     {
         return new PdfTableCell(_cells.ElementAt(index));

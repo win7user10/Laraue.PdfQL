@@ -11,11 +11,6 @@ public class PdfPage : PdfObject
         _page = page;
     }
 
-    public override object ToJson()
-    {
-        throw new NotImplementedException();
-    }
-
     public override string ToString()
     {
         return $"PdfPage #{_page.Number}";;

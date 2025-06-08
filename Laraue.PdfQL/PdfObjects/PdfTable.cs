@@ -11,17 +11,6 @@ public class PdfTable : PdfObject, IHasTableRowsContainer
     {
         _table = table;
     }
-    
-    public override object ToJson()
-    {
-        return new
-        {
-            Rows = _table.Rows
-                .Select(r => r
-                    .Select(c => c.GetText()))
-                .ToArray()
-        };
-    }
 
     public PdfTableCell CellAt(int index)
     {

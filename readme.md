@@ -4,6 +4,9 @@
 The library should allow to make queries to PDF. E.g. select table rows from tables where first cell text is "Number".
 The library should execute the passed sequence of operations, like stages in MongoDB.
 
+## Current status
+A little test example from the documentation below runs successfully.
+
 ## Why?
 Sometimes extracting data from PDF require write a lot of boilerplate C# code.
 
@@ -30,11 +33,9 @@ select(tables)
 
 Run the tree execution
 ```csharp
-var executor = PdfQLInstance.GetTreeExecutor(new ExecutorOptions { HandleErrors = false });
-var sourceResult = new PdfObjectStageResult(pdfContainer);
-
-var stageResult = executor.Execute(sourceResult, new StagesList { Stages = stages });
-var result = stageResult.ToJsonObject();
-
-var serialized = JsonSerializer.Serialize(result);
+var pdfBytes = File.ReadAllBytes("document.pdf");
+var pdfContainer = new PdfDocument(pdfBytes);
+        
+var executor = new PSqlExecutor();
+var result = executor.ExecutePsql(pipeline, pdfContainer);
 ```

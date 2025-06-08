@@ -11,13 +11,6 @@ public class PdfObjectContainer : PdfObject, IEnumerable<PdfObject>
     {
         _values = values;
     }
-    
-    public override object ToJson()
-    {
-        return _values
-            .Select(o => o.ToJson())
-            .ToArray();
-    }
 
     public IEnumerator<PdfObject> GetEnumerator()
     {
@@ -49,16 +42,9 @@ public class PdfObjectContainer<TPdfObject> : PdfObjectContainer, IEnumerable<TP
     private readonly TPdfObject[] _values;
 
     public PdfObjectContainer(TPdfObject[] values)
-        : base(values)
+        : base(values.Cast<PdfObject>().ToArray())
     {
         _values = values;
-    }
-    
-    public override object ToJson()
-    {
-        return _values
-            .Select(o => o.ToJson())
-            .ToArray();
     }
 
     public new IEnumerator<TPdfObject> GetEnumerator()

@@ -15,9 +15,4 @@ public class PdfTableCell : PdfObject
     {
         return _cell.GetText();
     }
-    
-    public override object ToJson()
-    {
-        return _cell.GetText();
-    }
 }
