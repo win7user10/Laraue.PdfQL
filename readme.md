@@ -5,8 +5,7 @@ The library should allow to make queries to PDF. E.g. select table rows from tab
 The library should execute the passed sequence of operations, like stages in MongoDB.
 
 ## Why?
-1. Sometimes extracting data from PDF require write a lot of boilerplate C# code 
-2. To get practice with AST.
+Sometimes extracting data from PDF require write a lot of boilerplate C# code.
 
 ## Development plan
 1. Define operations for PdfQL syntax tree, write code that use the tree to make queries. 
@@ -15,26 +14,18 @@ Write tests allows to make queries using code-defined tree
 
 ### Prototype of syntax tree
 
-Open PDF
+Open a PDF
 ```csharp
 var pdfBytes = File.ReadAllBytes("my.pdf");
 var pdfContainer = new PdfDocument(pdfBytes);
 ```
 
-Define syntax tree
-```csharp
-Stage[] stages =
-    [
-        new SelectStage
-        {
-            SelectExpression = new PsqlApplySelectorExpression
-            {
-                Selector = Selector.Tables,
-                ObjectType = typeof(PdfDocument)
-            },
-            ObjectType = typeof(IHasTablesContainer)
-        }
-    ];
+Define the operations sequence
+```
+select(tables)
+	->filter((item) => item.CellAt(4).Text() = 'Summary')
+	->selectMany(tableRows)
+	->map((item) => item.CellAt(1))
 ```
 
 Run the tree execution
