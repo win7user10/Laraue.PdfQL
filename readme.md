@@ -27,7 +27,7 @@ Define the operations sequence
 ```
 var psql = @"
     select(tables)
-        ->filter((item) => item.CellAt(4).Text() = 'Лейкоциты (WBC)')
+        ->filter((item) => item.CellAt(4).Text() = 'Name')
         ->selectMany(tableRows)
         ->map((item) => item.CellAt(1))";
 ```
@@ -40,3 +40,5 @@ var pdfContainer = new PdfDocument(pdfBytes);
 var executor = new PSqlExecutor();
 var result = executor.ExecutePsql(psql, pdfContainer);
 ```
+
+[Full stages documentation](Documentation/readme.md)
