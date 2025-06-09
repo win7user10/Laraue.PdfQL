@@ -26,6 +26,8 @@ select(tables) // PdfTable[] - Get all tables from a document
 ## PdfQL stage specification
 
 Any stage can be used in pipeline
+
+#### Stage syntax
 ```antlr
 Stage
   : SelectStage
@@ -34,5 +36,5 @@ Stage
   | MapStage
 ```
 
-Stages documentation
+Stages documentation  
 [SELECT](Select)
