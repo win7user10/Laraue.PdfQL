@@ -41,4 +41,4 @@ var executor = new PSqlExecutor();
 var result = executor.ExecutePsql(psql, pdfContainer);
 ```
 
-[Full stages documentation](Documentation/readme.md)
+[Full stages documentation](Documentation)
