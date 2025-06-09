@@ -4,7 +4,16 @@ PdfQL is the language to describe how to get data from PDF document.
 ## PdfQL pipeline
 
 Each instruction in the PdfQL is the stage that transform data from one format to another.
-Typical PdfQL declaration looks like
+List of stages in fact it is PdfQL.
+
+#### PdfQL syntax
+```antlr
+Stages
+  : Stage ('->' Stage)*
+  ;
+```
+
+### Typical PdfQL declaration
 
 ```csharp
 select(tables) // PdfTable[] - Get all tables from a document
@@ -13,6 +22,17 @@ select(tables) // PdfTable[] - Get all tables from a document
     ->map((item) => item.CellAt(1).Text()) // string - From table rows get cell #1 text.
 ```
 
+
 ## PdfQL stage specification
 
+Any stage can be used in pipeline
+```antlr
+Stage
+  : SelectStage
+  | SelectManyStage
+  | FilterStage
+  | MapStage
+```
+
+Stages documentation
 [SELECT](Select)
