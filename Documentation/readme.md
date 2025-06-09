@@ -15,4 +15,4 @@ select(tables) // PdfTable[] - Get all tables from a document
 
 ## PdfQL stage specification
 
-[SELECT](/Select/readme.md)
+[SELECT](Select/readme.md)
