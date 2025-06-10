@@ -1,55 +1,59 @@
-﻿using System.Diagnostics;
-using Laraue.PdfQL;
-using Laraue.PdfQL.Interpreter.DelegateCompiling;
-using Laraue.PdfQL.Interpreter.Parsing;
-using Laraue.PdfQL.Interpreter.Scanning;
+﻿using Laraue.PdfQL;
 using Laraue.PdfQL.PdfObjects;
-using Xunit.Abstractions;
 
 namespace Laraue.PQL.UnitTests;
 
 public class QueryTests
 {
-    public QueryTests(ITestOutputHelper testOutputHelper)
+    private readonly PSqlExecutor _pSqlExecutor;
+    private readonly PdfDocument _invoiceSamplePdf;
+    
+    public QueryTests()
     {
-        Trace.Listeners.Add(new TraceListener1(testOutputHelper));
-    }
-
-    public class TraceListener1 : TraceListener
-    {
-        private readonly ITestOutputHelper _testOutputHelper;
-
-        public TraceListener1(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
-        }
-        
-        public override void Write(string? message)
-        {
-            _testOutputHelper.WriteLine(message);
-        }
-
-        public override void WriteLine(string? message)
-        {
-            _testOutputHelper.WriteLine(message);
-        }
+        _pSqlExecutor = new PSqlExecutor();
+        _invoiceSamplePdf = OpenPdf("InvoiceSample.pdf");
     }
     
     [Fact]
-    public void ScannerTests()
+    public void Select_Tables_ReturnsTables()
     {
-        var psql = @"
-select(tables)
-	->filter((item) => item.CellAt(4).Text() = 'Лейкоциты (WBC)')
-	->selectMany(tableRows)
-	->map((item) => item.CellAt(1))";
+        var psql = "select(tables)";
 
-        var pdfBytes = File.ReadAllBytes("C:\\Users\\Ilya\\Downloads\\Telegram Desktop\\analyze_2023_12_14_15_12_23.pdf");
-        var pdfContainer = new PdfDocument(pdfBytes);
-        
-        var executor = new PSqlExecutor();
-        var result = executor.ExecutePsql(psql, pdfContainer);
+        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
 
-        Assert.NotNull(result);
+        var tables = Assert.IsType<StageResult<PdfTable>>(result);
+
+        Assert.Single(tables);
+    }
+    
+    [Fact]
+    public void Select_TableRows_ReturnsTableRows()
+    {
+        var psql = "select(tableRows)";
+
+        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+
+        var tableRows = Assert.IsType<StageResult<PdfTableRow>>(result);
+
+        Assert.Equal(17, tableRows.Count);
+    }
+    
+    [Fact]
+    public void Select_TableCells_ReturnsTableCells()
+    {
+        var psql = "select(tableCells)";
+
+        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+
+        var tableCells = Assert.IsType<StageResult<PdfTableCell>>(result);
+
+        Assert.Equal(25, tableCells.Count);
+    }
+
+    private PdfDocument OpenPdf(string name)
+    {
+        var bytes = File.ReadAllBytes(Path.Combine("files", name));
+
+        return new PdfDocument(bytes);
     }
 }

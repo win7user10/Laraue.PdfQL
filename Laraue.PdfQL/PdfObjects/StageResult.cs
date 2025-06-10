@@ -63,4 +63,6 @@ public class StageResult<TPdfObject> : StageResult, IEnumerable<TPdfObject>
         
         return sb.ToString();
     }
+    
+    public int Count => _values.Length; 
 }

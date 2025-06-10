@@ -4,5 +4,5 @@ namespace Laraue.PdfQL;
 
 public class Defaults
 {
-    public static readonly IExtractionAlgorithm ExtractionAlgorithm = new SpreadsheetExtractionAlgorithm();
+    public static readonly IExtractionAlgorithm ExtractionAlgorithm = new BasicExtractionAlgorithm();
 }

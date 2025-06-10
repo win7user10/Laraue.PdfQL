@@ -23,4 +23,10 @@
       <ProjectReference Include="..\Laraue.PdfQL\Laraue.PdfQL.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="files\InvoiceSample.pdf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

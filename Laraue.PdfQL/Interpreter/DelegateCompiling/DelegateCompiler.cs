@@ -79,6 +79,14 @@ internal class DelegateCompilerImpl
                     MapStageElement<IHasTablesContainer, StageResult<PdfTable>>(c => c.GetTablesContainer());
                     _currentType = typeof(StageResult<PdfTable>);
                     break;
+                case PdfElement.TableRow:
+                    MapStageElement<IHasTableRowsContainer, StageResult<PdfTableRow>>(c => c.GetTableRowsContainer());
+                    _currentType = typeof(StageResult<PdfTableRow>);
+                    break;
+                case PdfElement.TableCell:
+                    MapStageElement<IHasTableCellsContainer, StageResult<PdfTableCell>>(c => c.GetTableCellsContainer());
+                    _currentType = typeof(StageResult<PdfTableRow>);
+                    break;
                 default:
                     throw new NotImplementedException();
             }

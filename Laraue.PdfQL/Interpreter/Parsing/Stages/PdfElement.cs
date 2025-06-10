@@ -4,4 +4,5 @@ public enum PdfElement
 {
     Table,
     TableRow,
+    TableCell,
 }

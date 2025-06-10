@@ -79,7 +79,7 @@ public class PSqlExecutor : IPsqlExecutor
         {
             foreach (var parseError in parseResult.Errors)
             {
-                errors.Add(new PsqlExecutionError { Message = $"Position {parseError.Position}: parse error on {parseError.Token.Lexeme} - {parseError.Error}" });
+                errors.Add(new PsqlExecutionError { Message = $"Syntax error position {parseError.Position} on token '{parseError.Token.Lexeme}'. {parseError.Error}" });
             }
             
             return new GetCSharpDelegateResult { Errors = errors };
@@ -90,7 +90,7 @@ public class PSqlExecutor : IPsqlExecutor
         {
             foreach (var compileError in delegateCompilingResult.Errors)
             {
-                errors.Add(new PsqlExecutionError { Message = $"Stage {compileError.Stage}: compile error {compileError.Error}" });
+                errors.Add(new PsqlExecutionError { Message = $"Compile error on stage '{compileError.Stage}' : {compileError.Error}" });
             }
         }
         

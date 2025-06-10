@@ -17,7 +17,12 @@ internal class ParserImpl
     private readonly Token[] _tokens;
     private readonly List<ParseError> _errors = [];
     private int _current;
-    private static readonly string[] TableSelectors = ["tables", "tableRows"];
+    
+    private static readonly string[] TableSelectors = [
+        Definitions.TableSelector,
+        Definitions.TableRowsSelector,
+        Definitions.TableCellsSelector
+    ];
 
     public ParserImpl(Token[] tokens)
     {
@@ -40,10 +45,8 @@ internal class ParserImpl
                 Errors = _errors.ToArray()
             };
         }
-        catch (ParseException e)
+        catch (ParseException)
         {
-            _errors.Add(new ParseError { Error = $"Unhandled error: {e.Message}", Token = _tokens[_current], Position = 0 });
-            
             return new ParseResult
             {
                 Errors = _errors.ToArray(),
@@ -76,8 +79,7 @@ internal class ParserImpl
                     stages.Add(MapStage());
                     break;
                 default:
-                    Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'");
-                    break;
+                    throw Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'");
             };
             
             Consume(TokenType.RightBracket, "')' excepted after stage definition.");
@@ -120,17 +122,19 @@ internal class ParserImpl
 
     private PdfElement ConsumePdfSelector()
     {
-        var errorText = $"One of {string.Join(", ", TableSelectors)} excepted.";
+        var errorText = $"Excepted {string.Join("|", TableSelectors.Select(s => $"'{s}'"))}.";
         var token = Consume(TokenType.Identifier, errorText);
         if (!TableSelectors.Contains(token.Lexeme))
         {
-            Error(token, errorText);
+            throw Error(token, errorText);
         }
         
         return token.Lexeme switch
         {
-            "tables" => PdfElement.Table,
-            "tableRows" => PdfElement.TableRow,
+            Definitions.TableSelector => PdfElement.Table,
+            Definitions.TableRowsSelector => PdfElement.TableRow,
+            Definitions.TableCellsSelector => PdfElement.TableCell,
+            _ => throw new ParseException()
         };
     }
 
