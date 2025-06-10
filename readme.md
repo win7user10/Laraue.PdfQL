@@ -4,9 +4,6 @@
 The library should allow to make queries to PDF. E.g. select table rows from tables where first cell text is "Number".
 The library should execute the passed sequence of operations, like stages in MongoDB.
 
-## Current status
-A little test example from the documentation below runs successfully.
-
 ## Why?
 Sometimes extracting data from PDF require write a lot of boilerplate C# code.
 
@@ -14,6 +11,19 @@ Sometimes extracting data from PDF require write a lot of boilerplate C# code.
 1. Define operations for PdfQL syntax tree, write code that use the tree to make queries. 
 Write tests allows to make queries using code-defined tree
 2. Write PdfQL translator that will translate code to PdfQL syntax tree
+
+## Current implementation status
+3 - full implementation
+2 - positive cases implementation
+1 - one case implementation
+0 - not implemented
+
+| Stage             | Status |
+|-------------------|--------|
+| Select stage      | 2      |
+| Filter stage      | 1      |
+| Select many stage | 1      |
+| Map stage         | 1      |
 
 ### Prototype of syntax tree
 
