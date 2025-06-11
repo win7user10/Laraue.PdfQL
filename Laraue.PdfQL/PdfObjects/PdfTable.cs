@@ -3,7 +3,7 @@ using Tabula;
 
 namespace Laraue.PdfQL.PdfObjects;
 
-public class PdfTable : PdfObject, IHasTableRowsContainer
+public class PdfTable : PdfObject, IHasTableRowsContainer, IHasTableCellsContainer
 {
     private readonly Table _table;
 
@@ -11,20 +11,14 @@ public class PdfTable : PdfObject, IHasTableRowsContainer
     {
         _table = table;
     }
-
-    public PdfTableCell CellAt(int index)
-    {
-        return new PdfTableCell(_table.Cells.ElementAt(index));
-    }
     
     public StageResult<PdfTableRow> GetTableRowsContainer()
     {
-        return new StageResult<PdfTableRow>(GetTableRows());
-    }
-    
-    public PdfTableRow[] GetTableRows()
-    {
-        return _table.Rows.Select(r => new PdfTableRow(r)).ToArray();
+        var result = _table.Rows
+            .Select(r => new PdfTableRow(r))
+            .ToArray();
+        
+        return new StageResult<PdfTableRow>(result);
     }
 
     public override string ToString()
@@ -38,5 +32,14 @@ public class PdfTable : PdfObject, IHasTableRowsContainer
             : string.Empty;
         
         return $"PdfTable {_table.ColumnCount}x{_table.RowCount} ({text})";
+    }
+
+    public StageResult<PdfTableCell> GetTableCellsContainer()
+    {
+        var cells = _table.Cells
+            .Select(c => new PdfTableCell(c))
+            .ToArray();
+
+        return new StageResult<PdfTableCell>(cells);
     }
 }

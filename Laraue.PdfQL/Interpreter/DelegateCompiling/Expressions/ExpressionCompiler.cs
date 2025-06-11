@@ -126,7 +126,7 @@ public class TranslatorImpl
             {
                 _errors.Add(new ExpressionCompileError
                 {
-                    Error = $"Method is not found on {GetReadableTypeName(callee.Type)}",
+                    Error = $"Method is not found on {Utils.GetReadableTypeName(callee.Type)}",
                     Token = expr.Method
                 });
                 return null;
@@ -190,18 +190,5 @@ public class TranslatorImpl
             TokenType.LessOrEqualThan => ExpressionType.LessThanOrEqual,
             _ => throw new NotSupportedException(tokenType.ToString())
         };
-    }
-
-    private string GetReadableTypeName(Type type)
-    {
-        var sb = new StringBuilder(type.Name);
-        if (type.IsGenericType)
-        {
-            sb.Append("[");
-            sb.Append(string.Join(",", type.GenericTypeArguments.Select(a => a.Name)));
-            sb.Append("]");
-        }
-
-        return sb.ToString();
     }
 }

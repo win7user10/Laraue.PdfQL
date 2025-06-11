@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices.JavaScript;
+using System.Text;
 using Laraue.PdfQL.Interpreter.DelegateCompiling.Expressions;
 using Laraue.PdfQL.Interpreter.Parsing;
 using Laraue.PdfQL.Interpreter.Parsing.Expressions;
@@ -36,30 +38,35 @@ internal class DelegateCompilerImpl
 
     public DelegateCompilingResult Compile()
     {
-        foreach (var stage in _stages)
+        try
         {
-            switch (stage)
+            foreach (var stage in _stages)
             {
-                case SelectStage selectStage:
-                    SelectStage(selectStage);
-                    break;
-                case FilterStage filterStage:
-                    FilterStage(filterStage);
-                    break;
-                case SelectManyStage selectManyStage:
-                    SelectManyStage(selectManyStage);
-                    break;
-                case MapStage mapStage:
-                    MapStage(mapStage);
-                    break;
-                default:
-                    throw new NotSupportedException($"Unsupported stage: {stage.GetType().Name}");
+                switch (stage)
+                {
+                    case SelectStage selectStage:
+                        SelectStage(selectStage);
+                        break;
+                    case FilterStage filterStage:
+                        FilterStage(filterStage);
+                        break;
+                    case SelectManyStage selectManyStage:
+                        SelectManyStage(selectManyStage);
+                        break;
+                    case MapStage mapStage:
+                        MapStage(mapStage);
+                        break;
+                    default:
+                        throw new NotSupportedException($"Unsupported stage: {stage.GetType().Name}");
+                }
             }
-
-            if (_errors.Any())
+        }
+        catch (DelegateCompilingException)
+        {
+            return new DelegateCompilingResult
             {
-                break;
-            }
+                Errors = _errors.ToArray(),
+            };
         }
 
         return new DelegateCompilingResult
@@ -71,66 +78,43 @@ internal class DelegateCompilerImpl
 
     private void SelectStage(SelectStage stage)
     {
-        try
+        switch (stage.SelectElement)
         {
-            switch (stage.SelectElement)
-            {
-                case PdfElement.Table:
-                    MapStageElement<IHasTablesContainer, StageResult<PdfTable>>(c => c.GetTablesContainer());
-                    _currentType = typeof(StageResult<PdfTable>);
-                    break;
-                case PdfElement.TableRow:
-                    MapStageElement<IHasTableRowsContainer, StageResult<PdfTableRow>>(c => c.GetTableRowsContainer());
-                    _currentType = typeof(StageResult<PdfTableRow>);
-                    break;
-                case PdfElement.TableCell:
-                    MapStageElement<IHasTableCellsContainer, StageResult<PdfTableCell>>(c => c.GetTableCellsContainer());
-                    _currentType = typeof(StageResult<PdfTableRow>);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-        catch (DelegateCompilingException)
-        {
-            _errors.Add(new DelegateCompilingError
-            {
-                Error = $"Selector '{stage.SelectElement}' is not applicable on the current element",
-                Stage = stage,
-            });
+            case PdfElement.Table:
+                MapStageElement<IHasTablesContainer, StageResult<PdfTable>>(c => c.GetTablesContainer(), stage);
+                break;
+            case PdfElement.TableRow:
+                MapStageElement<IHasTableRowsContainer, StageResult<PdfTableRow>>(c => c.GetTableRowsContainer(), stage);
+                break;
+            case PdfElement.TableCell:
+                MapStageElement<IHasTableCellsContainer, StageResult<PdfTableCell>>(c => c.GetTableCellsContainer(), stage);
+                break;
+            default:
+                throw new NotImplementedException();
         }
     }
     
     private void SelectManyStage(SelectManyStage stage)
     {
-        try
+        switch (stage.SelectElement)
         {
-            switch (stage.SelectElement)
-            {
-                case PdfElement.Table:
-                    ApplyToEachElementAndUseSelectMany<IHasTablesContainer, PdfTable>(c => c.GetTablesContainer());
-                    _currentType = typeof(StageResult<PdfTable>);
-                    break;
-                case PdfElement.TableRow:
-                    ApplyToEachElementAndUseSelectMany<IHasTableRowsContainer, PdfTableRow>(c => c.GetTableRowsContainer());
-                    _currentType = typeof(StageResult<PdfTableRow>);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-        catch (DelegateCompilingException)
-        {
-            _errors.Add(new DelegateCompilingError
-            {
-                Error = $"Selector '{stage.SelectElement}' is not applicable on the current element",
-                Stage = stage,
-            });
+            case PdfElement.Table:
+                ApplyToEachElementAndUseSelectMany<IHasTablesContainer, PdfTable>(c => c.GetTablesContainer(), stage);
+                break;
+            case PdfElement.TableRow:
+                ApplyToEachElementAndUseSelectMany<IHasTableRowsContainer, PdfTableRow>(c => c.GetTableRowsContainer(), stage);
+                break;
+            case PdfElement.TableCell:
+                ApplyToEachElementAndUseSelectMany<IHasTableCellsContainer, PdfTableCell>(c => c.GetTableCellsContainer(), stage);
+                break;
+            default:
+                throw new NotImplementedException();
         }
     }
     
     private void ApplyToEachElementAndUseSelectMany<TContainerElement, TResultElement>(
-        Func<TContainerElement, IEnumerable<TResultElement>> @delegate)
+        Func<TContainerElement, IEnumerable<TResultElement>> @delegate,
+        Stage stage)
         where TResultElement : PdfObject
     {
         SetNextStageResult<TContainerElement, TResultElement>(elements =>
@@ -143,7 +127,7 @@ internal class DelegateCompilerImpl
             }
             
             return nextResult;
-        });
+        }, stage);
     }
 
     private void FilterStage(FilterStage stage)
@@ -157,7 +141,7 @@ internal class DelegateCompilerImpl
         genericMethod.Invoke(this, [expression.Compile()]);
     }
     
-    private void ApplyFilterToEachContainerElement<TContainerElement>(Func<TContainerElement, bool> @delegate)
+    private void ApplyFilterToEachContainerElement<TContainerElement>(Func<TContainerElement, bool> @delegate, Stage stage)
         where TContainerElement : PdfObject
     {
         SetNextStageResult<TContainerElement, TContainerElement>(elements =>
@@ -173,7 +157,7 @@ internal class DelegateCompilerImpl
             }
             
             return nextResult;
-        });
+        }, stage);
     }
 
     private void MapStage(MapStage stage)
@@ -188,7 +172,7 @@ internal class DelegateCompilerImpl
         genericMethod.Invoke(this, [expression.Compile()]);
     }
     
-    private void ApplyMapToEachContainerElement<TContainerElement, TResult>(Func<TContainerElement, TResult> @delegate)
+    private void ApplyMapToEachContainerElement<TContainerElement, TResult>(Func<TContainerElement, TResult> @delegate, Stage stage)
         where TContainerElement : PdfObject
     {
         SetNextStageResult<TContainerElement, TResult>(elements =>
@@ -201,7 +185,7 @@ internal class DelegateCompilerImpl
             }
             
             return nextResult;
-        });
+        }, stage);
     }
 
     private LambdaExpression? CompileLambda<TStage>(TStage stage, Func<TStage, Expr> getLambdaExpression)
@@ -240,15 +224,33 @@ internal class DelegateCompilerImpl
 
         if (compileResult.Expression is not LambdaExpression expression)
         {
-            throw new DelegateCompilingException($"Lambda expression expected, but {compileResult.Expression?.GetType().Name} taken");
+            throw CompilingError($"Lambda expression expected, but {compileResult.Expression?.GetType().Name} taken", stage);
         }
 
         return expression;
     }
 
     private void SetNextStageResult<TContainerElement, TResultElement>(
-        Func<IEnumerable<TContainerElement>, IEnumerable<TResultElement>> @delegate)
+        Func<IEnumerable<TContainerElement>, IEnumerable<TResultElement>> @delegate,
+        Stage stage)
     {
+        var stageResultType = GetStageResultType(_currentType);
+        if (stageResultType is null || !typeof(TContainerElement).IsAssignableFrom(stageResultType))
+        {
+            if (stageResultType != null)
+            {
+                throw CompilingError( $"'{stageResultType.Name}' is not assignable to '{typeof(TContainerElement).Name}'.", stage);
+            }
+            
+            var error = new StringBuilder()
+                .Append(Utils.GetReadableTypeName(_currentType))
+                .Append("' is not assignable to '")
+                .Append(Utils.GetReadableTypeName(typeof(StageResult<TContainerElement>)))
+                .Append("'.");
+
+            throw CompilingError(error.ToString(), stage);
+        }
+        
         var resultRef = _result;
         _result = document =>
         {
@@ -263,14 +265,31 @@ internal class DelegateCompilerImpl
 
             return new StageResult<TResultElement>(nextResult.ToArray());
         };
+        
+        _currentType = typeof(StageResult<TResultElement>);
     }
 
-    private void MapStageElement<TExceptedType, TResult>(Func<TExceptedType, TResult> selector)
+    private Type? GetStageResultType(Type type)
+    {
+        if (!typeof(StageResult).IsAssignableFrom(type))
+        {
+            return null;
+        }
+
+        if (!type.IsGenericType || type.GenericTypeArguments.Length != 1)
+        {
+            return null;
+        }
+
+        return type.GenericTypeArguments[0];
+    }
+    
+    private void MapStageElement<TExceptedType, TResult>(Func<TExceptedType, TResult> selector, Stage stage)
         where TResult : class
     {
         if (!typeof(TExceptedType).IsAssignableFrom(_currentType))
         {
-            throw new DelegateCompilingException($"Method is not exists on the instance of type {typeof(TExceptedType)}");
+            throw CompilingError($"Method is not exists on the instance of type {typeof(TExceptedType)}", stage);
         }
 
         var resultRef = _result;
@@ -285,5 +304,14 @@ internal class DelegateCompilerImpl
 
             return selector(exceptedType);
         };
+        
+        _currentType = typeof(TResult);
+    }
+
+    private DelegateCompilingException CompilingError(string message, Stage stage)
+    {
+        _errors.Add(new DelegateCompilingError { Error = message, Stage = stage });
+        
+        return new DelegateCompilingException();
     }
 }

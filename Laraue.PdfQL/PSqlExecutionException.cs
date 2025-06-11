@@ -14,14 +14,11 @@ public class PSqlExecutionException : Exception
 
     private static string GetErrorMessage(List<PsqlExecutionError> errors)
     {
-        var sb = new StringBuilder("PSql execution errors:");
+        var sb = new StringBuilder("PSql execution error:");
 
-        for (var index = 0; index < errors.Count; index++)
+        foreach (var error in errors)
         {
-            var error = errors[index];
             sb.AppendLine();
-            sb.Append(index + 1);
-            sb.Append(". ");
             sb.Append(error.Message);
         }
 

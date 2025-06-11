@@ -2,6 +2,4 @@
 
 public class DelegateCompilingException : Exception
 {
-    public DelegateCompilingException(string message) : base(message)
-    {}
 }

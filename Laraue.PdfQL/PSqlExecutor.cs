@@ -90,7 +90,7 @@ public class PSqlExecutor : IPsqlExecutor
         {
             foreach (var compileError in delegateCompilingResult.Errors)
             {
-                errors.Add(new PsqlExecutionError { Message = $"Compile error on stage '{compileError.Stage}' : {compileError.Error}" });
+                errors.Add(new PsqlExecutionError { Message = $"Compile error on stage '{compileError.Stage.GetType().Name}' : {compileError.Error}" });
             }
         }
         

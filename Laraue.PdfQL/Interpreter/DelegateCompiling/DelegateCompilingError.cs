@@ -4,6 +4,6 @@ namespace Laraue.PdfQL.Interpreter.DelegateCompiling;
 
 public class DelegateCompilingError
 {
-    public Stage? Stage { get; set; }
+    public required Stage Stage { get; set; }
     public required string Error { get; set; }
 }
