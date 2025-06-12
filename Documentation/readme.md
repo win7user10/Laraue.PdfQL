@@ -37,7 +37,11 @@ Stage
 ```
 
 Stages documentation  
+
 [Select](Select)  
 [SelectMany](SelectMany)  
 [Map](Map)  
-[Filter](Filter)    
+[Filter](Filter)  
+[Single](Single) - Not implemented  
+[First](First) - Not implemented  
+[FirstOrDefault](FirstOrDefault) - Not implemented  
