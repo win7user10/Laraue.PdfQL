@@ -169,7 +169,7 @@ internal class DelegateCompilerImpl
         var method = GetType().GetMethod(nameof(ApplyMapToEachContainerElement), BindingFlags.NonPublic | BindingFlags.Instance)!;
         var genericMethod = method.MakeGenericMethod(expression.Parameters[0].Type, expression.ReturnType);
         
-        genericMethod.Invoke(this, [expression.Compile()]);
+        genericMethod.Invoke(this, [expression.Compile(), stage]);
     }
     
     private void ApplyMapToEachContainerElement<TContainerElement, TResult>(Func<TContainerElement, TResult> @delegate, Stage stage)

@@ -97,6 +97,18 @@ public class QueryTests
 
         Assert.Equal(25, tableCells.Count);
     }
+    
+    [Fact]
+    public void Map_ByText_ReturnsText()
+    {
+        var psql = "select(tables)->map((item) => item.Text())";
+
+        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+
+        var content = Assert.IsType<StageResult<string>>(result);
+
+        Assert.StartsWith("||Denny Gunawan|", content[0]);
+    }
 
     private PdfDocument OpenPdf(string name)
     {

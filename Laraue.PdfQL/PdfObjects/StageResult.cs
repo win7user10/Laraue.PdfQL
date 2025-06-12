@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Laraue.PdfQL.PdfObjects;
 
-public class StageResult : PdfObject, IEnumerable<object>
+public class StageResult : IEnumerable<object>
 {
     private readonly object[] _values;
 
@@ -64,5 +64,7 @@ public class StageResult<TPdfObject> : StageResult, IEnumerable<TPdfObject>
         return sb.ToString();
     }
     
-    public int Count => _values.Length; 
+    public int Count => _values.Length;
+
+    public TPdfObject this[int i] => _values[i];
 }

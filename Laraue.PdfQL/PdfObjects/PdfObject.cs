@@ -2,4 +2,5 @@
 
 public abstract class PdfObject
 {
+    public abstract string Text();
 }

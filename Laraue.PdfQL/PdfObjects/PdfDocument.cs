@@ -56,4 +56,9 @@ public class PdfDocument : PdfObject, IHasTablesContainer, IHasTableRowsContaine
                 return Defaults.ExtractionAlgorithm.Extract(oe);
             });
     }
+
+    public override string Text()
+    {
+        throw new NotImplementedException();
+    }
 }

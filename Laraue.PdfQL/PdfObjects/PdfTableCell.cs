@@ -11,7 +11,7 @@ public class PdfTableCell : PdfObject
         _cell = cell;
     }
 
-    public string Text()
+    public override string Text()
     {
         return _cell.GetText();
     }

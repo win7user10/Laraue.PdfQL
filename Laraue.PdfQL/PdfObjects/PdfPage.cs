@@ -15,4 +15,9 @@ public class PdfPage : PdfObject
     {
         return $"PdfPage #{_page.Number}";;
     }
+
+    public override string Text()
+    {
+        throw new NotImplementedException();
+    }
 }

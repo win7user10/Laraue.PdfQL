@@ -1,4 +1,5 @@
-﻿using Laraue.PdfQL.PdfObjects.Interfaces;
+﻿using System.Text;
+using Laraue.PdfQL.PdfObjects.Interfaces;
 using Tabula;
 
 namespace Laraue.PdfQL.PdfObjects;
@@ -32,6 +33,25 @@ public class PdfTable : PdfObject, IHasTableRowsContainer, IHasTableCellsContain
             : string.Empty;
         
         return $"PdfTable {_table.ColumnCount}x{_table.RowCount} ({text})";
+    }
+
+    public override string Text()
+    {
+        var sb = new StringBuilder();
+        foreach (var row in _table.Rows)
+        {
+            sb.Append('|');
+            
+            foreach (var cell in row)
+            {
+                sb.Append(cell.GetText());
+                sb.Append('|');
+            }
+            
+            sb.Append(Environment.NewLine);
+        }
+
+        return sb.ToString();
     }
 
     public StageResult<PdfTableCell> GetTableCellsContainer()
