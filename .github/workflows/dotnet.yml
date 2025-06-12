@@ -16,17 +16,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
+        
     - name: Restore dependencies
       run: dotnet restore
+      
     - name: Build
       run: dotnet build --no-restore --configuration Release
+      
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test
+      
     - name: Generate a NuGet package
-      run: for p in $(find ./src -name *.csproj); do dotnet pack $p --no-build -c Release -o .; done
+      run: dotnet pack --no-build -c Release -o .
+      
     - name: Push to GitHub package registry
       run: dotnet nuget push "*.nupkg" -k ${{secrets.NUGETORGTOKEN}} -s https://api.nuget.org/v3/index.json --skip-duplicate 
