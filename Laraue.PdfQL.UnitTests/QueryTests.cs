@@ -109,6 +109,20 @@ public class QueryTests
 
         Assert.StartsWith("||Denny Gunawan|", content[0]);
     }
+    
+    [Fact]
+    public void Map_Sequential_ReturnsText()
+    {
+        var psql = "select(tableRows)->map((item) => item.CellAt(1))->map((item) => item.Text())";
+
+        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+
+        var firstRowColumnsTexts = Assert.IsType<StageResult<string>>(result);
+
+        Assert.Equal("Denny Gunawan", firstRowColumnsTexts[0]);
+        Assert.Equal("221 Queen St", firstRowColumnsTexts[1]);
+        Assert.Equal(17, firstRowColumnsTexts.Count);
+    }
 
     private PdfDocument OpenPdf(string name)
     {

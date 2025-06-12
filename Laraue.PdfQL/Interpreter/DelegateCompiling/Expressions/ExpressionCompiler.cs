@@ -131,6 +131,23 @@ public class TranslatorImpl
                 });
                 return null;
             }
+
+            var exceptedParameters = methodInfo.GetParameters();
+            if (exceptedParameters.Length != expr.Arguments.Count)
+            {
+                var sb = new StringBuilder($"Excepted call with signature '{methodInfo.Name}(")
+                    .Append(string.Join(", ", exceptedParameters.Select(p => $"{p.ParameterType.Name} {p.Name}")))
+                    .Append($")' got '{methodInfo.Name}(")
+                    .Append(string.Join(", ", expr.Arguments))
+                    .Append(")'");
+                
+                _errors.Add(new ExpressionCompileError
+                {
+                    Error = sb.ToString(),
+                    Token = expr.Method
+                });
+                return null;
+            }
             
             var arguments = new List<Expression?>();
             foreach (var argument in expr.Arguments)
