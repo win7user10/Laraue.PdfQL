@@ -138,7 +138,7 @@ internal class DelegateCompilerImpl
 
         var method = GetType().GetMethod(nameof(ApplyFilterToEachContainerElement), BindingFlags.NonPublic | BindingFlags.Instance)!;
         var genericMethod = method.MakeGenericMethod(expression.Parameters[0].Type);
-        genericMethod.Invoke(this, [expression.Compile()]);
+        genericMethod.Invoke(this, [expression.Compile(), stage]);
     }
     
     private void ApplyFilterToEachContainerElement<TContainerElement>(Func<TContainerElement, bool> @delegate, Stage stage)

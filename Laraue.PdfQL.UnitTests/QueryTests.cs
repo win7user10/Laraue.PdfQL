@@ -123,6 +123,20 @@ public class QueryTests
         Assert.Equal("221 Queen St", firstRowColumnsTexts[1]);
         Assert.Equal(17, firstRowColumnsTexts.Count);
     }
+    
+    [Fact]
+    public void Filter_ByText_ReturnsFilteredSources()
+    {
+        var psql = "select(tableCells)->filter((item) => item.Text() = 'Denny Gunawan')";
+
+        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+
+        var cells = Assert.IsType<StageResult<PdfTableCell>>(result);
+
+        var cell = Assert.Single<PdfTableCell>(cells);
+        
+        Assert.Equal(cell.Text(), "Denny Gunawan");
+    }
 
     private PdfDocument OpenPdf(string name)
     {

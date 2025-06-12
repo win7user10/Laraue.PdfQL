@@ -9,7 +9,7 @@ MapStage
   ;
   
 LambdaExpression
-  : (Args '=>' BinaryExpression)
+  : (Args '=>' MemberExpression)
   ;
 ```
 

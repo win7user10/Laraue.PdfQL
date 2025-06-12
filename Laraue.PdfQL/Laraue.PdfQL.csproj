@@ -4,6 +4,14 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Description>Pdf query language interpreter.</Description>
+        <RepositoryUrl>https://github.com/win7user10/Laraue.PdfQL</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <Authors>Belyanskiy Ilya</Authors>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageTags>Query language;PDF extrator;PDF manipulating</PackageTags>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>

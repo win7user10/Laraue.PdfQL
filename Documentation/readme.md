@@ -40,4 +40,4 @@ Stages documentation
 [Select](Select)  
 [SelectMany](SelectMany)  
 [Map](Map)  
-Filter - in progress  
+[Filter](Filter)    
