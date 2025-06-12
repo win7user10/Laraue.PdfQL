@@ -20,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Laraue.PdfQL\Laraue.PdfQL.csproj" />
+      <ProjectReference Include="..\..\src\Laraue.PdfQL\Laraue.PdfQL.csproj" />
     </ItemGroup>
 
     <ItemGroup>

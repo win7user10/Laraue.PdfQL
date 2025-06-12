@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laraue.PdfQL", "Laraue.PdfQL\Laraue.PdfQL.csproj", "{BECC3733-A2E5-4FEB-B016-C31AFC635BED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laraue.PdfQL", "src\Laraue.PdfQL\Laraue.PdfQL.csproj", "{BECC3733-A2E5-4FEB-B016-C31AFC635BED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E29440A0-7BEF-4169-A864-E589EAF18129}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laraue.PdfQL.UnitTests", "Laraue.PdfQL.UnitTests\Laraue.PdfQL.UnitTests.csproj", "{FCECE34C-5C4D-47F2-B034-5AD896545A35}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Laraue.PdfQL.UnitTests", "tests\Laraue.PdfQL.UnitTests\Laraue.PdfQL.UnitTests.csproj", "{FCECE34C-5C4D-47F2-B034-5AD896545A35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
