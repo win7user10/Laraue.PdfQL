@@ -37,4 +37,7 @@ Stage
 ```
 
 Stages documentation  
-[SELECT](Select)
+[Select](Select)
+[SelectMany](SelectMany)
+Filter - in progress
+Map - in progress
