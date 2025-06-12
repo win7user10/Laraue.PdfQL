@@ -10,7 +10,7 @@ The library should execute the passed sequence of operations, like stages in Mon
 ## Why?
 Sometimes extracting data from PDF require write a lot of boilerplate C# code.
 
-### Prototype of syntax tree
+### How to use
 
 Open a PDF
 ```csharp
@@ -29,9 +29,6 @@ var psql = @"
 
 Run the tree execution
 ```csharp
-var pdfBytes = File.ReadAllBytes("document.pdf");
-var pdfContainer = new PdfDocument(pdfBytes);
-        
 var executor = new PSqlExecutor();
 var result = executor.ExecutePsql(psql, pdfContainer);
 ```
