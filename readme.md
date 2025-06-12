@@ -1,5 +1,6 @@
 # Laraue PDF query language
 
+[![latest version](https://img.shields.io/nuget/v/Laraue.PdfQL)](https://www.nuget.org/packages/Laraue.PdfQL)
 [![latest version](https://img.shields.io/nuget/dt/Laraue.PdfQL)](https://www.nuget.org/packages/Laraue.PdfQL)
 
 ## Introduction
