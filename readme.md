@@ -1,5 +1,7 @@
 # Laraue PDF query language
 
+[![latest version](https://img.shields.io/nuget/dt/Laraue.PdfQL)](https://www.nuget.org/packages/Laraue.PdfQL)
+
 ## Introduction
 The library should allow to make queries to PDF. E.g. select table rows from tables where first cell text is "Number".
 The library should execute the passed sequence of operations, like stages in MongoDB.
