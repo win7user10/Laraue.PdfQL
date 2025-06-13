@@ -132,7 +132,7 @@ internal class ParserImpl
     private SingleStage SingleStage()
     {
         Expr? filter = null;
-        if (!Match(TokenType.RightBracket))
+        if (!Check(TokenType.RightBracket))
             filter = Equality();
 
         return new SingleStage(filter);
@@ -141,7 +141,7 @@ internal class ParserImpl
     private FirstStage FirstStage()
     {
         Expr? filter = null;
-        if (!Match(TokenType.RightBracket))
+        if (!Check(TokenType.RightBracket))
             filter = Equality();
 
         return new FirstStage(filter);
@@ -150,7 +150,7 @@ internal class ParserImpl
     private FirstOrDefaultStage FirstOrDefaultStage()
     {
         Expr? filter = null;
-        if (!Match(TokenType.RightBracket))
+        if (!Check(TokenType.RightBracket))
             filter = Equality();
 
         return new FirstOrDefaultStage(filter);

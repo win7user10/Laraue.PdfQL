@@ -24,7 +24,7 @@ public class PSqlExecutor : IPsqlExecutor
         var result = TryExecutePsql(psql, document);
         if (result.HasErrors)
         {
-            throw new PSqlExecutionException(result.Errors);
+            throw new PSqlCompileException(result.Errors);
         }
         
         return result.Result!;
@@ -61,14 +61,14 @@ public class PSqlExecutor : IPsqlExecutor
 
     private GetCSharpDelegateResult GetCSharpDelegate(string psql)
     {
-        var errors = new List<PsqlExecutionError>();
+        var errors = new List<PsqlCompileError>();
         
         var scanResult = _scanner.ScanTokens(psql);
         if (scanResult.HasErrors)
         {
             foreach (var scanError in scanResult.Errors)
             {
-                errors.Add(new PsqlExecutionError { Message = $"Position {scanError.Position}: syntax error {scanError}" });
+                errors.Add(new PsqlCompileError { Message = $"Position {scanError.Position}: syntax error {scanError}" });
             }
             
             return new GetCSharpDelegateResult { Errors = errors };
@@ -79,7 +79,7 @@ public class PSqlExecutor : IPsqlExecutor
         {
             foreach (var parseError in parseResult.Errors)
             {
-                errors.Add(new PsqlExecutionError { Message = $"Syntax error position {parseError.Position} on token '{parseError.Token.Lexeme}'. {parseError.Error}" });
+                errors.Add(new PsqlCompileError { Message = $"Syntax error position {parseError.Position} on token '{parseError.Token.Lexeme}'. {parseError.Error}" });
             }
             
             return new GetCSharpDelegateResult { Errors = errors };
@@ -90,7 +90,7 @@ public class PSqlExecutor : IPsqlExecutor
         {
             foreach (var compileError in delegateCompilingResult.Errors)
             {
-                errors.Add(new PsqlExecutionError { Message = $"Compile error on stage '{compileError.Stage.GetType().Name}' : {compileError.Error}" });
+                errors.Add(new PsqlCompileError { Message = $"Compile error on stage '{compileError.Stage.GetType().Name}' : {compileError.Error}" });
             }
         }
         
@@ -101,7 +101,7 @@ public class PSqlExecutor : IPsqlExecutor
     private class GetCSharpDelegateResult
     {
         public Func<PdfDocument, object>? Delegate { get; init; }
-        public required List<PsqlExecutionError> Errors { get; init; }
+        public required List<PsqlCompileError> Errors { get; init; }
     }
 }
 
@@ -119,11 +119,11 @@ public class PsqlExecutionResult : PSqlSyntaxCheckResult
 
 public class PSqlSyntaxCheckResult
 {
-    public List<PsqlExecutionError> Errors { get; set; } = new ();
+    public List<PsqlCompileError> Errors { get; set; } = new ();
     public bool HasErrors => Errors.Any();
 }
 
-public class PsqlExecutionError
+public class PsqlCompileError
 {
     public required string Message { get; init; }
 }

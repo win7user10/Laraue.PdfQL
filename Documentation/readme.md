@@ -34,6 +34,10 @@ Stage
   | SelectManyStage
   | FilterStage
   | MapStage
+  | SingleStage
+  | FirstOrDefaultStage
+  | FirstStage
+  ;
 ```
 
 Stages documentation  
@@ -42,6 +46,8 @@ Stages documentation
 [SelectMany](SelectMany)  
 [Map](Map)  
 [Filter](Filter)  
-[Single](Single) - Not implemented  
-[First](First) - Not implemented  
-[FirstOrDefault](FirstOrDefault) - Not implemented  
+Take - Not implemented
+Skip - Not implemented
+[Single](Single)  
+[First](First)  
+[FirstOrDefault](FirstOrDefault)  

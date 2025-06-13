@@ -1,4 +1,5 @@
 ﻿using Laraue.PdfQL;
+using Laraue.PdfQL.Interpreter.DelegateCompiling;
 using Laraue.PdfQL.PdfObjects;
 
 namespace Laraue.PQL.UnitTests;
@@ -55,7 +56,7 @@ public class QueryTests
     {
         var psql = "select(cows)";
 
-        var ex = Assert.Throws<PSqlExecutionException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
+        var ex = Assert.Throws<PSqlCompileException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
 
         var error = Assert.Single(ex.Errors);
         
@@ -67,7 +68,7 @@ public class QueryTests
     {
         var psql = "selectMany(tables)";
 
-        var ex = Assert.Throws<PSqlExecutionException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
+        var ex = Assert.Throws<PSqlCompileException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
 
         var error = Assert.Single(ex.Errors);
         
@@ -142,7 +143,7 @@ public class QueryTests
     [InlineData("first")]
     [InlineData("single")]
     [InlineData("firstOrDefault")]
-    public void GetSingleElement_WithFilter_ReturnsFirstElement(string stage)
+    public void GetOneElement_WithFilter_ReturnsFirstElement(string stage)
     {
         var psql = $"select(tableCells)->{stage}((item) => item.Text() = 'Denny Gunawan')";
 
@@ -151,6 +152,38 @@ public class QueryTests
         var cell = Assert.IsType<PdfTableCell>(result);
         
         Assert.Equal(cell.Text(), "Denny Gunawan");
+    }
+
+    [Theory]
+    [InlineData("first")]
+    [InlineData("single")]
+    public void GetOneElement_NoElements_Throws(string stage)
+    {
+        var psql = $"select(tableCells)->filter((item) => item.Text() = 'abcdef')->{stage}()";
+        
+        var ex = Assert.Throws<PSqlRuntimeException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
+        
+        Assert.Contains("Sequence contains no elements", ex.Message);
+    }
+    
+    [Fact]
+    public void FirstOrDefault_NoElements_ReturnsNull()
+    {
+        var psql = $"select(tableCells)->filter((item) => item.Text() = 'abcdef')->firstOrDefault()";
+        
+        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        
+        Assert.Null(result);
+    }
+    
+    [Fact]
+    public void Single_MoreThanOneElement_Throws()
+    {
+        var psql = "select(tableCells)->single()";
+        
+        var ex = Assert.Throws<PSqlRuntimeException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
+        
+        Assert.Contains("Sequence contains more than one element", ex.Message);
     }
 
     private PdfDocument OpenPdf(string name)
