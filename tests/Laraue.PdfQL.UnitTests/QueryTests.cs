@@ -137,6 +137,21 @@ public class QueryTests
         
         Assert.Equal(cell.Text(), "Denny Gunawan");
     }
+    
+    [Theory]
+    [InlineData("first")]
+    [InlineData("single")]
+    [InlineData("firstOrDefault")]
+    public void GetSingleElement_WithFilter_ReturnsFirstElement(string stage)
+    {
+        var psql = $"select(tableCells)->{stage}((item) => item.Text() = 'Denny Gunawan')";
+
+        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+
+        var cell = Assert.IsType<PdfTableCell>(result);
+        
+        Assert.Equal(cell.Text(), "Denny Gunawan");
+    }
 
     private PdfDocument OpenPdf(string name)
     {

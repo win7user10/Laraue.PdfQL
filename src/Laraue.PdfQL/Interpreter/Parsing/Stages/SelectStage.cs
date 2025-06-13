@@ -2,6 +2,8 @@
 
 public class SelectStage : Stage
 {
+    public const string Name = "select";
+
     public SelectStage(PdfElement selectElement)
     {
         SelectElement = selectElement;
@@ -11,6 +13,6 @@ public class SelectStage : Stage
 
     public override string ToString()
     {
-        return $"select({SelectElement})";
+        return $"{Name}({SelectElement})";
     }
 }

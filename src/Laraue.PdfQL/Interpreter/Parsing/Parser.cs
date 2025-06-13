@@ -66,17 +66,26 @@ internal class ParserImpl
 
             switch (stageName.Lexeme)
             {
-                case "select":
+                case Parsing.Stages.SelectStage.Name:
                     stages.Add(SelectStage());
                     break;
-                case "filter":
+                case Parsing.Stages.FilterStage.Name:
                     stages.Add(FilterStage());
                     break;
-                case "selectMany":
+                case Parsing.Stages.SelectManyStage.Name:
                     stages.Add(SelectManyStage());
                     break;
-                case "map":
+                case Parsing.Stages.MapStage.Name:
                     stages.Add(MapStage());
+                    break;
+                case Parsing.Stages.SingleStage.Name:
+                    stages.Add(SingleStage());
+                    break;
+                case Parsing.Stages.FirstStage.Name:
+                    stages.Add(FirstStage());
+                    break;
+                case Parsing.Stages.FirstOrDefaultStage.Name:
+                    stages.Add(FirstOrDefaultStage());
                     break;
                 default:
                     throw Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'");
@@ -118,6 +127,33 @@ internal class ParserImpl
         var projection = Expression();
         
         return new MapStage(projection);
+    }
+    
+    private SingleStage SingleStage()
+    {
+        Expr? filter = null;
+        if (!Match(TokenType.RightBracket))
+            filter = Equality();
+
+        return new SingleStage(filter);
+    }
+    
+    private FirstStage FirstStage()
+    {
+        Expr? filter = null;
+        if (!Match(TokenType.RightBracket))
+            filter = Equality();
+
+        return new FirstStage(filter);
+    }
+    
+    private FirstOrDefaultStage FirstOrDefaultStage()
+    {
+        Expr? filter = null;
+        if (!Match(TokenType.RightBracket))
+            filter = Equality();
+
+        return new FirstOrDefaultStage(filter);
     }
 
     private PdfElement ConsumePdfSelector()

@@ -2,16 +2,16 @@
 
 namespace Laraue.PdfQL.Interpreter.Parsing.Stages;
 
-public class FilterStage : Stage
+public class SingleStage : OneElementStage
 {
-    public const string Name = "filter";
+    public const string Name = "single";
     
-    public FilterStage(Expr filter)
+    public SingleStage(Expr? filter) : base(filter)
     {
         Filter = filter;
     }
 
-    public Expr Filter { get; set; }
+    public Expr? Filter { get; set; }
 
     public override string ToString()
     {
