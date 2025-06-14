@@ -22,9 +22,9 @@ Define the operations sequence
 ```
 var pdfql = @"
     select(tables)
-        ->filter((item) => item.CellAt(4).Text() = 'Name')
+        ->filter((item) => item.GetCell(4).Text() = 'Name')
         ->selectMany(tableRows)
-        ->map((item) => item.CellAt(1))";
+        ->map((item) => item.GetCell(1))";
 ```
 
 Run the tree execution

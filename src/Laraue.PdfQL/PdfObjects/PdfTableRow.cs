@@ -13,9 +13,9 @@ public class PdfTableRow : PdfObject, IHasTableCellsContainer
         _cells = cells;
     }
 
-    public PdfTableCell? CellAt(int column)
+    public PdfTableCell? GetCell(int column)
     {
-        var value = _cells.Skip(column).FirstOrDefault();
+        var value = _cells.GetByCellNumber(column);
         return value is null ? null : new PdfTableCell(value);
     }
 

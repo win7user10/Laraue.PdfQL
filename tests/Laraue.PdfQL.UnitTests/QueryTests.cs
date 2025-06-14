@@ -117,7 +117,7 @@ public class QueryTests
     [Fact]
     public void Map_Sequential_ReturnsText()
     {
-        var pdfql = "select(tableRows)->map((item) => item.CellAt(1))->map((item) => item.Text())";
+        var pdfql = "select(tableRows)->map((item) => item.GetCell(2))->map((item) => item.Text())";
 
         var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
@@ -192,7 +192,7 @@ public class QueryTests
     [Fact]
     public void CellAt_OnTable_Success()
     {
-        var pdfql = "select(tables)->map(item => item.CellAt(1, 1).Text())->first()";
+        var pdfql = "select(tables)->map(item => item.GetCell(2, 2).Text())->first()";
         
         var result = _pdfqlExecutor.ExecutePdfql<string>(pdfql, _invoiceSamplePdf);
         
@@ -202,7 +202,7 @@ public class QueryTests
     [Fact]
     public void CellAt_OnTableRow_Success()
     {
-        var pdfql = "select(tableRows)->map(item => item.CellAt(1).Text())->first()";
+        var pdfql = "select(tableRows)->map(item => item.GetCell(2).Text())->first()";
         
         var result = _pdfqlExecutor.ExecutePdfql<string>(pdfql, _invoiceSamplePdf);
         
