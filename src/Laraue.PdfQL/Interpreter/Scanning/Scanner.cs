@@ -62,7 +62,11 @@ public sealed class Scanner : IScanner
                 case '/': AddToken(TokenType.Divide); break;
                 case '*': AddToken(TokenType.Multiply); break;
                 case '=':
-                    AddToken(PopNextCharIf(c => c == '>') ? TokenType.Lambda : TokenType.Equal); break;
+                    AddToken(PopNextCharIf(c => c == '>') 
+                        ? TokenType.Lambda
+                        : PopNextCharIf(c => c == '=') 
+                            ? TokenType.Equal
+                            : TokenType.Assign); break;
                 case '!':
                     AddToken(PopNextCharIf(c => c == '=') ? TokenType.NotEqual : TokenType.Not); break;
                 case '<':

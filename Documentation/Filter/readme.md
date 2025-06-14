@@ -17,5 +17,5 @@ Map examples
 1. For each table cell returns only those where text is equal to 'Title'.
 ```csharp
 select(tableCells) // PdfTableCell[]
-    ->filter((item) => item.Text() = 'Title') // PdfTableCell[]
+    ->filter((item) => item.Text() == 'Title') // PdfTableCell[]
 ```

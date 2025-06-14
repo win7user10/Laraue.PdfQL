@@ -83,7 +83,7 @@ public class PdfqlExecutor : IPdfqlExecutor
         {
             foreach (var scanError in scanResult.Errors)
             {
-                errors.Add(new PsqlCompileError { Message = $"Position {scanError.Position}: syntax error {scanError}" });
+                errors.Add(new PsqlCompileError { Message = $"Position {scanError.Position}: syntax error {scanError.Error}" });
             }
             
             return new GetCSharpDelegateResult { Errors = errors };

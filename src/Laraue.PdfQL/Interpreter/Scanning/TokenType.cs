@@ -13,6 +13,7 @@ public enum TokenType
     GreaterThan,
     LessOrEqualThan,
     GreaterOrEqualThan,
+    Assign,
     Equal,
     NotEqual,
     Not,

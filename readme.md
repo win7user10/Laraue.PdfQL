@@ -22,7 +22,7 @@ Define the operations sequence
 ```
 var pdfql = @"
     select(tables)
-        ->filter((item) => item.GetCell(4).Text() = 'Name')
+        ->filter((item) => item.GetCell(4).Text() == 'Name')
         ->selectMany(tableRows)
         ->map((item) => item.GetCell(1))";
 ```

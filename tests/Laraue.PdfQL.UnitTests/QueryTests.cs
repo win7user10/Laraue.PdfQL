@@ -131,7 +131,7 @@ public class QueryTests
     [Fact]
     public void Filter_ByText_ReturnsFilteredSources()
     {
-        var pdfql = "select(tableCells)->filter(item => item.Text() = 'Denny Gunawan')";
+        var pdfql = "select(tableCells)->filter(item => item.Text() == 'Denny Gunawan')";
 
         var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
@@ -148,7 +148,7 @@ public class QueryTests
     [InlineData("firstOrDefault")]
     public void GetOneElement_WithFilter_ReturnsFirstElement(string stage)
     {
-        var pdfql = $"select(tableCells)->{stage}((item) => item.Text() = 'Denny Gunawan')";
+        var pdfql = $"select(tableCells)->{stage}((item) => item.Text() == 'Denny Gunawan')";
 
         var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
@@ -162,7 +162,7 @@ public class QueryTests
     [InlineData("single")]
     public void GetOneElement_NoElements_Throws(string stage)
     {
-        var pdfql = $"select(tableCells)->filter((item) => item.Text() = 'abcdef')->{stage}()";
+        var pdfql = $"select(tableCells)->filter((item) => item.Text() == 'abcdef')->{stage}()";
         
         var ex = Assert.Throws<PdfqlRuntimeException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
         
@@ -172,7 +172,7 @@ public class QueryTests
     [Fact]
     public void FirstOrDefault_NoElements_ReturnsNull()
     {
-        var pdfql = $"select(tableCells)->filter((item) => item.Text() = 'abcdef')->firstOrDefault()";
+        var pdfql = $"select(tableCells)->filter((item) => item.Text() == 'abcdef')->firstOrDefault()";
         
         var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
         
@@ -219,6 +219,14 @@ public class QueryTests
         var jsonObject = _serializer.ToJsonObject(result);
 
         Assert.IsType<string[][]>(jsonObject);
+    }
+    
+    [Fact]
+    public void Map_ToNewObjectType_Success()
+    {
+        var pdfql = "select(tables)->map(table => new { Name = 'Table', Object = table })";
+        
+        var result = _pdfqlExecutor.ExecutePdfql<List<object>>(pdfql, _invoiceSamplePdf);
     }
 
     private PdfDocument OpenPdf(string name)
