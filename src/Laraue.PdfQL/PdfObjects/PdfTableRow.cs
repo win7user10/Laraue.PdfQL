@@ -1,9 +1,10 @@
 ﻿using System.Text;
+using Laraue.PdfQL.PdfObjects.Interfaces;
 using Tabula;
 
 namespace Laraue.PdfQL.PdfObjects;
 
-public class PdfTableRow : PdfObject
+public class PdfTableRow : PdfObject, IHasTableCellsContainer
 {
     private readonly IReadOnlyList<Cell> _cells;
 
@@ -30,5 +31,14 @@ public class PdfTableRow : PdfObject
         }
         
         return sb.ToString();
+    }
+
+    public StageResult<PdfTableCell> GetTableCellsContainer()
+    {
+        var cells = _cells
+            .Select(c => new PdfTableCell(c))
+            .ToArray();
+
+        return new StageResult<PdfTableCell>(cells);
     }
 }

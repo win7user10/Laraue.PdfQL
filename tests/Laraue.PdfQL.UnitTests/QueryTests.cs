@@ -1,6 +1,7 @@
 ﻿using Laraue.PdfQL;
 using Laraue.PdfQL.Interpreter.DelegateCompiling;
 using Laraue.PdfQL.PdfObjects;
+using Laraue.PdfQL.PdfObjects.Serializing;
 
 namespace Laraue.PQL.UnitTests;
 
@@ -8,10 +9,12 @@ public class QueryTests
 {
     private readonly PdfqlExecutor _pdfqlExecutor;
     private readonly PdfDocument _invoiceSamplePdf;
+    private readonly ISerializer _serializer;
     
     public QueryTests()
     {
         _pdfqlExecutor = new PdfqlExecutor();
+        _serializer = new Serializer();
         _invoiceSamplePdf = OpenPdf("InvoiceSample.pdf");
     }
     
@@ -204,6 +207,18 @@ public class QueryTests
         var result = _pdfqlExecutor.ExecutePdfql<string>(pdfql, _invoiceSamplePdf);
         
         Assert.Equal("Denny Gunawan", result);
+    }
+    
+    [Fact]
+    public void Serialize_SingleTable_Success()
+    {
+        var pdfql = "select(tables)->first()";
+        
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
+
+        var jsonObject = _serializer.ToJsonObject(result);
+
+        Assert.IsType<PdfTableJsonObject>(jsonObject);
     }
 
     private PdfDocument OpenPdf(string name)
