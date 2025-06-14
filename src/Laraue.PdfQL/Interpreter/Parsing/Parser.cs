@@ -181,7 +181,7 @@ internal class ParserImpl
     
     private Expr Equality()
     {
-        if (Match(TokenType.LeftBracket))
+        if (Check(TokenType.LeftBracket) || (Check(TokenType.Identifier) && CheckNext(TokenType.Lambda)))
             return Lambda();
         
         var expr = Comparison();
@@ -199,16 +199,26 @@ internal class ParserImpl
     private Expr Lambda()
     {
         var parameters = new List<Token>();
-        if (!Check(TokenType.RightBracket))
+        if (Match(TokenType.LeftBracket))
         {
-            do
+            if (!Check(TokenType.RightBracket))
             {
-                var parameter = Consume(TokenType.Identifier, "identifier expected.");
-                parameters.Add(parameter);
-            } while (Match(TokenType.Comma));
+                do
+                {
+                    var parameter = Consume(TokenType.Identifier, "identifier expected.");
+                    parameters.Add(parameter);
+                } while (Match(TokenType.Comma));
+            }
+            
+            Consume(TokenType.RightBracket, "Except ) after arguments list");
+        }
+        else
+        {
+            var parameter = Consume(TokenType.Identifier, "identifier expected.");
+            parameters.Add(parameter);
         }
         
-        Consume(TokenType.RightBracket, "Except ) after arguments list");
+        
         Consume(TokenType.Lambda, "Except => after arguments declaration");
 
         var body = Expression();
@@ -351,6 +361,7 @@ internal class ParserImpl
     }
 
     private bool Check(TokenType tokenType) => !IsParseCompleted && Peek().TokenType == tokenType;
+    private bool CheckNext(TokenType tokenType) => _tokens.Length > _current + 1 && _tokens[_current + 1].TokenType == tokenType;
 
     private bool IsParseCompleted => Peek().TokenType == TokenType.Eof;
     

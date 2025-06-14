@@ -121,12 +121,13 @@ public class TranslatorImpl
             }
             
             // Check method signature
-            var methodInfo = callee.Type.GetMethod(expr.Method.Lexeme!);
+            var methodName = expr.Method.Lexeme!;
+            var methodInfo = callee.Type.GetMethod(methodName);
             if (methodInfo == null)
             {
                 _errors.Add(new ExpressionCompileError
                 {
-                    Error = $"Method is not found on {Utils.GetReadableTypeName(callee.Type)}",
+                    Error = $"Method {methodName} is not found on {Utils.GetReadableTypeName(callee.Type)}",
                     Token = expr.Method
                 });
                 return null;

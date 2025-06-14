@@ -128,7 +128,7 @@ public class QueryTests
     [Fact]
     public void Filter_ByText_ReturnsFilteredSources()
     {
-        var psql = "select(tableCells)->filter((item) => item.Text() = 'Denny Gunawan')";
+        var psql = "select(tableCells)->filter(item => item.Text() = 'Denny Gunawan')";
 
         var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
 
