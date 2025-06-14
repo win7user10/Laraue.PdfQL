@@ -1,3 +1,3 @@
 ﻿namespace Laraue.PdfQL.PdfObjects.Serializing;
 
-public record PdfDocumentJsonObject(PdfTableJsonObject[] Tables);
+public record PdfDocumentJsonObject(string[][][] Tables);

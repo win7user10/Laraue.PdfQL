@@ -218,7 +218,7 @@ public class QueryTests
 
         var jsonObject = _serializer.ToJsonObject(result);
 
-        Assert.IsType<PdfTableJsonObject>(jsonObject);
+        Assert.IsType<string[][]>(jsonObject);
     }
 
     private PdfDocument OpenPdf(string name)

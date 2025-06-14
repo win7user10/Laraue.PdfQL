@@ -36,19 +36,19 @@ public class Serializer : ISerializer
         };
     }
     
-    private static object ToJsonObject(PdfDocument obj)
+    private static PdfDocumentJsonObject ToJsonObject(PdfDocument obj)
     {
         return new PdfDocumentJsonObject(((IEnumerable<PdfTable>)obj.GetTablesContainer()).Select(ToJsonObject).ToArray());
     }
     
-    private static PdfTableJsonObject ToJsonObject(PdfTable obj)
+    private static string[][] ToJsonObject(PdfTable obj)
     {
-        return new PdfTableJsonObject(((IEnumerable<PdfTableRow>)obj.GetTableRowsContainer()).Select(ToJsonObject).ToArray());
+        return ((IEnumerable<PdfTableRow>)obj.GetTableRowsContainer()).Select(ToJsonObject).ToArray();
     }
 
-    private static PdfTableRowJsonObject ToJsonObject(PdfTableRow obj)
+    private static string[] ToJsonObject(PdfTableRow obj)
     {
-        return new PdfTableRowJsonObject(((IEnumerable<PdfTableCell>)obj.GetTableCellsContainer()).Select(ToJsonObject).ToArray());
+        return ((IEnumerable<PdfTableCell>)obj.GetTableCellsContainer()).Select(ToJsonObject).ToArray();
     }
     
     private static string ToJsonObject(PdfTableCell obj)
