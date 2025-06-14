@@ -23,6 +23,8 @@ public enum TokenType
     Divide,
     Multiply,
     
+    LeftParentheses,
+    RightParentheses,
     LeftBracket,
     RightBracket,
     

@@ -62,7 +62,7 @@ internal class ParserImpl
         while (Match(TokenType.Identifier))
         {
             var stageName = Previous();
-            Consume(TokenType.LeftBracket, "'(' excepted after stage definition.");
+            Consume(TokenType.LeftParentheses, "'(' excepted after stage definition.");
 
             switch (stageName.Lexeme)
             {
@@ -91,7 +91,7 @@ internal class ParserImpl
                     throw Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'");
             };
             
-            Consume(TokenType.RightBracket, "')' excepted after stage definition.");
+            Consume(TokenType.RightParentheses, "')' excepted after stage definition.");
             if (!Match(TokenType.NextPipeline))
             {
                 break;
@@ -132,7 +132,7 @@ internal class ParserImpl
     private SingleStage SingleStage()
     {
         Expr? filter = null;
-        if (!Check(TokenType.RightBracket))
+        if (!Check(TokenType.RightParentheses))
             filter = Equality();
 
         return new SingleStage(filter);
@@ -141,7 +141,7 @@ internal class ParserImpl
     private FirstStage FirstStage()
     {
         Expr? filter = null;
-        if (!Check(TokenType.RightBracket))
+        if (!Check(TokenType.RightParentheses))
             filter = Equality();
 
         return new FirstStage(filter);
@@ -150,7 +150,7 @@ internal class ParserImpl
     private FirstOrDefaultStage FirstOrDefaultStage()
     {
         Expr? filter = null;
-        if (!Check(TokenType.RightBracket))
+        if (!Check(TokenType.RightParentheses))
             filter = Equality();
 
         return new FirstOrDefaultStage(filter);
@@ -181,7 +181,7 @@ internal class ParserImpl
     
     private Expr Equality()
     {
-        if (Check(TokenType.LeftBracket) || (Check(TokenType.Identifier) && CheckNext(TokenType.Lambda)))
+        if (Check(TokenType.LeftParentheses) || (Check(TokenType.Identifier) && CheckNext(TokenType.Lambda)))
             return Lambda();
         
         var expr = Comparison();
@@ -199,9 +199,9 @@ internal class ParserImpl
     private Expr Lambda()
     {
         var parameters = new List<Token>();
-        if (Match(TokenType.LeftBracket))
+        if (Match(TokenType.LeftParentheses))
         {
-            if (!Check(TokenType.RightBracket))
+            if (!Check(TokenType.RightParentheses))
             {
                 do
                 {
@@ -210,7 +210,7 @@ internal class ParserImpl
                 } while (Match(TokenType.Comma));
             }
             
-            Consume(TokenType.RightBracket, "Except ) after arguments list");
+            Consume(TokenType.RightParentheses, "Except ) after arguments list");
         }
         else
         {
@@ -291,7 +291,7 @@ internal class ParserImpl
             if (Match(TokenType.Dot))
             {
                 var propertyName = Consume(TokenType.Identifier, "Except property or method name after '.'");
-                Consume(TokenType.LeftBracket, "'(' excepted");
+                Consume(TokenType.LeftParentheses, "'(' excepted");
                 expr = FinishCall(expr, propertyName);
             }
             else
@@ -306,7 +306,7 @@ internal class ParserImpl
     private Expr FinishCall(Expr callee, Token methodToken)
     {
         var arguments = new List<Expr>();
-        if (!Check(TokenType.RightBracket))
+        if (!Check(TokenType.RightParentheses))
         {
             do
             {
@@ -314,7 +314,7 @@ internal class ParserImpl
             } while (Match(TokenType.Comma));
         }
 
-        Consume(TokenType.RightBracket, "Except ) after arguments list");
+        Consume(TokenType.RightParentheses, "Except ) after arguments list");
         return new InstanceMethodCallExpr(callee, arguments, methodToken);
     }
 
@@ -328,11 +328,11 @@ internal class ParserImpl
         if (Match(TokenType.Integer, TokenType.String))
             return new LiteralExpr(Previous().Literal);
 
-        if (!Match(TokenType.LeftBracket))
+        if (!Match(TokenType.LeftParentheses))
             throw Error(Peek(), "Unexpected expression");
         
         var exp = Expression();
-        Consume(TokenType.RightBracket, "Expect right bracket after expression.");
+        Consume(TokenType.RightParentheses, "Expect right bracket after expression.");
         return new GroupingExpr(exp);
     }
 

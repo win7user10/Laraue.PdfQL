@@ -52,8 +52,10 @@ public sealed class Scanner : IScanner
                     break;
                 case '\t':
                     break;
-                case '(': AddToken(TokenType.LeftBracket); break;
-                case ')': AddToken(TokenType.RightBracket); break;
+                case '(': AddToken(TokenType.LeftParentheses); break;
+                case ')': AddToken(TokenType.RightParentheses); break;
+                case '{': AddToken(TokenType.LeftBracket); break;
+                case '}': AddToken(TokenType.RightBracket); break;
                 case ',': AddToken(TokenType.Comma); break;
                 case '.': AddToken(TokenType.Dot); break;
                 case '+': AddToken(TokenType.Plus); break;
