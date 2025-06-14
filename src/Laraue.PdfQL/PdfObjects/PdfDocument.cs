@@ -6,10 +6,17 @@ namespace Laraue.PdfQL.PdfObjects;
 
 public class PdfDocument : PdfObject, IHasTablesContainer, IHasTableRowsContainer, IHasTableCellsContainer
 {
+    private readonly PdfDocumentOptions _options;
     internal readonly UglyToad.PdfPig.PdfDocument SourceDocument;
 
-    public PdfDocument(byte[] pdfBytes)
+    public PdfDocument(byte[] pdfBytes) : this(pdfBytes, new PdfDocumentOptions())
     {
+        SourceDocument = UglyToad.PdfPig.PdfDocument.Open(pdfBytes, new ParsingOptions { ClipPaths = true });
+    }
+    
+    public PdfDocument(byte[] pdfBytes, PdfDocumentOptions options)
+    {
+        _options = options;
         SourceDocument = UglyToad.PdfPig.PdfDocument.Open(pdfBytes, new ParsingOptions { ClipPaths = true });
     }
 
@@ -53,7 +60,7 @@ public class PdfDocument : PdfObject, IHasTablesContainer, IHasTableRowsContaine
             .SelectMany(p =>
             {
                 var oe = ObjectExtractor.ExtractPage(p);
-                return Defaults.ExtractionAlgorithm.Extract(oe);
+                return _options.ExtractionAlgorithm.Extract(oe);
             });
     }
 
