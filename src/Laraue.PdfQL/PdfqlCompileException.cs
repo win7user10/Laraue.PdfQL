@@ -2,11 +2,11 @@
 
 namespace Laraue.PdfQL;
 
-public class PSqlCompileException : Exception
+public class PdfqlCompileException : Exception
 {
     public IReadOnlyList<PsqlCompileError> Errors { get; }
 
-    public PSqlCompileException(List<PsqlCompileError> errors)
+    public PdfqlCompileException(List<PsqlCompileError> errors)
         : base(GetErrorMessage(errors))
     {
         Errors = errors;

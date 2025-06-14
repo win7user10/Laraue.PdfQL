@@ -12,9 +12,10 @@ public class PdfTableRow : PdfObject
         _cells = cells;
     }
 
-    public PdfTableCell CellAt(int index)
+    public PdfTableCell? CellAt(int column)
     {
-        return new PdfTableCell(_cells.ElementAt(index));
+        var value = _cells.Skip(column).FirstOrDefault();
+        return value is null ? null : new PdfTableCell(value);
     }
 
     public override string Text()

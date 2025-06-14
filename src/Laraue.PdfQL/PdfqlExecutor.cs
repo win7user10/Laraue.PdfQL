@@ -5,34 +5,48 @@ using Laraue.PdfQL.PdfObjects;
 
 namespace Laraue.PdfQL;
 
-public class PSqlExecutor : IPsqlExecutor
+/// <inheritdoc />
+public class PdfqlExecutor : IPdfqlExecutor
 {
     private readonly Scanner _scanner;
     private readonly Parser _parser;
     private readonly DelegateCompiler _delegateCompiler;
 
-    public PSqlExecutor()
+    /// <summary>
+    /// Initializes <see cref="PdfqlExecutor"/>.
+    /// </summary>
+    public PdfqlExecutor()
     {
         _scanner = new Scanner();
         _parser = new Parser();
         _delegateCompiler = new DelegateCompiler();
     }
 
-
-    public object ExecutePsql(string psql, PdfDocument document)
+    /// <inheritdoc />
+    public object ExecutePdfql(string pdfql, PdfDocument document)
     {
-        var result = TryExecutePsql(psql, document);
+        var result = TryExecutePdfql(pdfql, document);
         if (result.HasErrors)
         {
-            throw new PSqlCompileException(result.Errors);
+            throw new PdfqlCompileException(result.Errors);
         }
         
         return result.Result!;
     }
 
-    public PsqlExecutionResult TryExecutePsql(string psql, PdfDocument document)
+    /// <inheritdoc />
+    public T ExecutePdfql<T>(string pdfql, PdfDocument document)
     {
-        var result = GetCSharpDelegate(psql);
+        var result = ExecutePdfql(pdfql, document);
+        return result is T typeResult 
+            ? typeResult
+            : throw new PdfqlRuntimeException($"Excepted result of type {typeof(T)} but taken {result.GetType()}.");
+    }
+
+    /// <inheritdoc />
+    public PsqlExecutionResult TryExecutePdfql(string pdfql, PdfDocument document)
+    {
+        var result = GetCSharpDelegate(pdfql);
         if (result.Errors.Count > 0)
         {
             return new PsqlExecutionResult
@@ -49,9 +63,10 @@ public class PSqlExecutor : IPsqlExecutor
         };
     }
 
-    public PSqlSyntaxCheckResult CheckSyntax(string psql)
+    /// <inheritdoc />
+    public PSqlSyntaxCheckResult CheckSyntax(string pdfql)
     {
-        var result = GetCSharpDelegate(psql);
+        var result = GetCSharpDelegate(pdfql);
 
         return new PSqlSyntaxCheckResult
         {
@@ -103,27 +118,4 @@ public class PSqlExecutor : IPsqlExecutor
         public Func<PdfDocument, object>? Delegate { get; init; }
         public required List<PsqlCompileError> Errors { get; init; }
     }
-}
-
-public interface IPsqlExecutor
-{
-    object ExecutePsql(string psql, PdfDocument document);
-    PsqlExecutionResult TryExecutePsql(string psql, PdfDocument document);
-    PSqlSyntaxCheckResult CheckSyntax(string psql);
-}
-
-public class PsqlExecutionResult : PSqlSyntaxCheckResult
-{
-    public object? Result { get; set; }
-}
-
-public class PSqlSyntaxCheckResult
-{
-    public List<PsqlCompileError> Errors { get; set; } = new ();
-    public bool HasErrors => Errors.Any();
-}
-
-public class PsqlCompileError
-{
-    public required string Message { get; init; }
 }

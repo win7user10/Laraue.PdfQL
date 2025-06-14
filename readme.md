@@ -20,7 +20,7 @@ var pdfContainer = new PdfDocument(pdfBytes);
 
 Define the operations sequence
 ```
-var psql = @"
+var pdfql = @"
     select(tables)
         ->filter((item) => item.CellAt(4).Text() = 'Name')
         ->selectMany(tableRows)
@@ -29,8 +29,8 @@ var psql = @"
 
 Run the tree execution
 ```csharp
-var executor = new PSqlExecutor();
-var result = executor.ExecutePsql(psql, pdfContainer);
+var executor = new PdfqlExecutor();
+var result = executor.ExecutePsql(pdfql, pdfContainer);
 ```
 
 [Full available stages documentation](Documentation)

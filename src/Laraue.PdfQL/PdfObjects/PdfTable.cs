@@ -62,4 +62,10 @@ public class PdfTable : PdfObject, IHasTableRowsContainer, IHasTableCellsContain
 
         return new StageResult<PdfTableCell>(cells);
     }
+
+    public PdfTableCell? CellAt(int row, int column)
+    {
+        var value = _table.Rows[row][column];
+        return value is null ? null : new PdfTableCell(value);
+    }
 }

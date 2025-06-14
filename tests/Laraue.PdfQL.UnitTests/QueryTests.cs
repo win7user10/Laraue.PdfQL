@@ -6,21 +6,21 @@ namespace Laraue.PQL.UnitTests;
 
 public class QueryTests
 {
-    private readonly PSqlExecutor _pSqlExecutor;
+    private readonly PdfqlExecutor _pdfqlExecutor;
     private readonly PdfDocument _invoiceSamplePdf;
     
     public QueryTests()
     {
-        _pSqlExecutor = new PSqlExecutor();
+        _pdfqlExecutor = new PdfqlExecutor();
         _invoiceSamplePdf = OpenPdf("InvoiceSample.pdf");
     }
     
     [Fact]
     public void Select_Tables_ReturnsTables()
     {
-        var psql = "select(tables)";
+        var pdfql = "select(tables)";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var tables = Assert.IsType<StageResult<PdfTable>>(result);
 
@@ -30,9 +30,9 @@ public class QueryTests
     [Fact]
     public void Select_TableRows_ReturnsTableRows()
     {
-        var psql = "select(tableRows)";
+        var pdfql = "select(tableRows)";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var tableRows = Assert.IsType<StageResult<PdfTableRow>>(result);
 
@@ -42,9 +42,9 @@ public class QueryTests
     [Fact]
     public void Select_TableCells_ReturnsTableCells()
     {
-        var psql = "select(tableCells)";
+        var pdfql = "select(tableCells)";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var tableCells = Assert.IsType<StageResult<PdfTableCell>>(result);
 
@@ -54,9 +54,9 @@ public class QueryTests
     [Fact]
     public void Select_WrongIdentifier_ThrowsException()
     {
-        var psql = "select(cows)";
+        var pdfql = "select(cows)";
 
-        var ex = Assert.Throws<PSqlCompileException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
+        var ex = Assert.Throws<PdfqlCompileException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
 
         var error = Assert.Single(ex.Errors);
         
@@ -66,9 +66,9 @@ public class QueryTests
     [Fact]
     public void SelectMany_WrongUsage_ThrowsException()
     {
-        var psql = "selectMany(tables)";
+        var pdfql = "selectMany(tables)";
 
-        var ex = Assert.Throws<PSqlCompileException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
+        var ex = Assert.Throws<PdfqlCompileException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
 
         var error = Assert.Single(ex.Errors);
         
@@ -78,9 +78,9 @@ public class QueryTests
     [Fact]
     public void SelectMany_TableRows_ReturnsTableRows()
     {
-        var psql = "select(tables)->selectMany(tableRows)";
+        var pdfql = "select(tables)->selectMany(tableRows)";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var tableRows = Assert.IsType<StageResult<PdfTableRow>>(result);
         
@@ -90,9 +90,9 @@ public class QueryTests
     [Fact]
     public void SelectMany_TableCells_ReturnsTableCells()
     {
-        var psql = "select(tables)->selectMany(tableCells)";
+        var pdfql = "select(tables)->selectMany(tableCells)";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var tableCells = Assert.IsType<StageResult<PdfTableCell>>(result);
 
@@ -102,9 +102,9 @@ public class QueryTests
     [Fact]
     public void Map_ByText_ReturnsText()
     {
-        var psql = "select(tables)->map((item) => item.Text())";
+        var pdfql = "select(tables)->map((item) => item.Text())";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var content = Assert.IsType<StageResult<string>>(result);
 
@@ -114,9 +114,9 @@ public class QueryTests
     [Fact]
     public void Map_Sequential_ReturnsText()
     {
-        var psql = "select(tableRows)->map((item) => item.CellAt(1))->map((item) => item.Text())";
+        var pdfql = "select(tableRows)->map((item) => item.CellAt(1))->map((item) => item.Text())";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var firstRowColumnsTexts = Assert.IsType<StageResult<string>>(result);
 
@@ -128,9 +128,9 @@ public class QueryTests
     [Fact]
     public void Filter_ByText_ReturnsFilteredSources()
     {
-        var psql = "select(tableCells)->filter(item => item.Text() = 'Denny Gunawan')";
+        var pdfql = "select(tableCells)->filter(item => item.Text() = 'Denny Gunawan')";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var cells = Assert.IsType<StageResult<PdfTableCell>>(result);
 
@@ -145,9 +145,9 @@ public class QueryTests
     [InlineData("firstOrDefault")]
     public void GetOneElement_WithFilter_ReturnsFirstElement(string stage)
     {
-        var psql = $"select(tableCells)->{stage}((item) => item.Text() = 'Denny Gunawan')";
+        var pdfql = $"select(tableCells)->{stage}((item) => item.Text() = 'Denny Gunawan')";
 
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
 
         var cell = Assert.IsType<PdfTableCell>(result);
         
@@ -159,9 +159,9 @@ public class QueryTests
     [InlineData("single")]
     public void GetOneElement_NoElements_Throws(string stage)
     {
-        var psql = $"select(tableCells)->filter((item) => item.Text() = 'abcdef')->{stage}()";
+        var pdfql = $"select(tableCells)->filter((item) => item.Text() = 'abcdef')->{stage}()";
         
-        var ex = Assert.Throws<PSqlRuntimeException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
+        var ex = Assert.Throws<PdfqlRuntimeException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
         
         Assert.Contains("Sequence contains no elements", ex.Message);
     }
@@ -169,9 +169,9 @@ public class QueryTests
     [Fact]
     public void FirstOrDefault_NoElements_ReturnsNull()
     {
-        var psql = $"select(tableCells)->filter((item) => item.Text() = 'abcdef')->firstOrDefault()";
+        var pdfql = $"select(tableCells)->filter((item) => item.Text() = 'abcdef')->firstOrDefault()";
         
-        var result = _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
         
         Assert.Null(result);
     }
@@ -179,11 +179,31 @@ public class QueryTests
     [Fact]
     public void Single_MoreThanOneElement_Throws()
     {
-        var psql = "select(tableCells)->single()";
+        var pdfql = "select(tableCells)->single()";
         
-        var ex = Assert.Throws<PSqlRuntimeException>(() => _pSqlExecutor.ExecutePsql(psql, _invoiceSamplePdf));
+        var ex = Assert.Throws<PdfqlRuntimeException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
         
         Assert.Contains("Sequence contains more than one element", ex.Message);
+    }
+    
+    [Fact]
+    public void CellAt_OnTable_Success()
+    {
+        var pdfql = "select(tables)->map(item => item.CellAt(1, 1).Text())->first()";
+        
+        var result = _pdfqlExecutor.ExecutePdfql<string>(pdfql, _invoiceSamplePdf);
+        
+        Assert.Equal("221 Queen St", result);
+    }
+    
+    [Fact]
+    public void CellAt_OnTableRow_Success()
+    {
+        var pdfql = "select(tableRows)->map(item => item.CellAt(1).Text())->first()";
+        
+        var result = _pdfqlExecutor.ExecutePdfql<string>(pdfql, _invoiceSamplePdf);
+        
+        Assert.Equal("Denny Gunawan", result);
     }
 
     private PdfDocument OpenPdf(string name)

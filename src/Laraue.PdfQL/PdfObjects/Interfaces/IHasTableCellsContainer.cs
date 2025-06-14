@@ -2,5 +2,5 @@
 
 public interface IHasTableCellsContainer
 {
-    public StageResult<PdfTableCell> GetTableCellsContainer();
+    StageResult<PdfTableCell> GetTableCellsContainer();
 }

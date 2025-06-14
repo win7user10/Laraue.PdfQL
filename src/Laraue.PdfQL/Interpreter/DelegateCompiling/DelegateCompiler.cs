@@ -335,7 +335,7 @@ internal class DelegateCompilerImpl
 
             if (collection is not IEnumerable<TContainerElement> enumerable)
             {
-                throw new PSqlRuntimeException($"Collection was excepted but {collection.GetType().Name} taken");
+                throw new PdfqlRuntimeException($"Collection was excepted but {collection.GetType().Name} taken");
             }
 
             var nextResult = @delegate(enumerable);
@@ -358,8 +358,8 @@ internal class DelegateCompilerImpl
             var result = elements.Take(2).ToArray();
             return result.Length switch
             {
-                0 => throw new PSqlRuntimeException("Sequence contains no elements"),
-                2 => throw new PSqlRuntimeException("Sequence contains more than one element"),
+                0 => throw new PdfqlRuntimeException("Sequence contains no elements"),
+                2 => throw new PdfqlRuntimeException("Sequence contains more than one element"),
                 _ => result[0]
             };
         }, stage);
@@ -372,7 +372,7 @@ internal class DelegateCompilerImpl
             var result = elements.Take(1).ToArray();
             return result.Length switch
             {
-                0 => throw new PSqlRuntimeException("Sequence contains no elements"),
+                0 => throw new PdfqlRuntimeException("Sequence contains no elements"),
                 _ => result[0]
             };
         }, stage);
@@ -394,7 +394,7 @@ internal class DelegateCompilerImpl
             var collection = resultRef(document);
             if (collection is not IEnumerable<T> enumerable)
             {
-                throw new PSqlRuntimeException($"Collection was excepted");
+                throw new PdfqlRuntimeException($"Collection was excepted");
             }
 
             return getElement(enumerable);
@@ -455,7 +455,7 @@ internal class DelegateCompilerImpl
 
             if (temp is not TExceptedType exceptedType)
             {
-                throw new PSqlRuntimeException($"Method is not exists on the object of type {temp.GetType()}");
+                throw new PdfqlRuntimeException($"Method is not exists on the object of type {temp.GetType()}");
             }
 
             return selector(exceptedType);
