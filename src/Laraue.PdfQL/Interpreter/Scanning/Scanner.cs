@@ -19,6 +19,11 @@ public sealed class Scanner : IScanner
         
         private const char StringStart = '\'';
 
+        private Dictionary<string, TokenType> _keywords = new()
+        {
+            ["new"] = TokenType.New,
+        };
+
         public ScannerImplementation(string input)
         {
             _input = input;
@@ -137,7 +142,8 @@ public sealed class Scanner : IScanner
             {
             }
             
-            AddToken(TokenType.Identifier);
+            var text = _input[_startPosition.._currentPosition];
+            AddToken(_keywords.GetValueOrDefault(text, TokenType.Identifier));
         }
 
         private char Advance()

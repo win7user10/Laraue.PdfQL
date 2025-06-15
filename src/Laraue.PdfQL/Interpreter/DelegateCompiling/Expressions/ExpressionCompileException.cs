@@ -2,7 +2,9 @@
 
 public class ExpressionCompileException : Exception
 {
-    protected ExpressionCompileException(string message)
+    public ExpressionCompileException(string message)
         : base(message)
-    {}
+    {
+        
+    }
 }

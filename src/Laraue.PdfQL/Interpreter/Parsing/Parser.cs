@@ -328,12 +328,52 @@ internal class ParserImpl
         if (Match(TokenType.Integer, TokenType.String))
             return new LiteralExpr(Previous().Literal);
 
+        if (Match(TokenType.New))
+            return New();
+
         if (!Match(TokenType.LeftParentheses))
-            throw Error(Peek(), "Unexpected expression");
+            throw Error(Peek(), "Unknown token type.");
         
         var exp = Expression();
         Consume(TokenType.RightParentheses, "Expect right bracket after expression.");
         return new GroupingExpr(exp);
+    }
+
+    private Expr New()
+    {
+        Consume(TokenType.LeftBracket, "Except '{' after 'new' declaration");
+
+        var members = new Dictionary<string, MemberInitMember>();
+        
+        while (true)
+        {
+            if (Match(TokenType.Identifier))
+            {
+                var memberNameToken = Previous();
+                var memberName = memberNameToken.Lexeme!;
+                if (members.ContainsKey(memberName))
+                {
+                    throw Error(memberNameToken, $"Duplicate member name '{memberName}'");
+                }
+                
+                Consume(TokenType.Assign, "'=' excepted");
+                var expr = Expression();
+                members.Add(memberName, new MemberInitMember(memberNameToken, expr));
+                
+                if (!Match(TokenType.Comma))
+                {
+                    break;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+        
+        Consume(TokenType.RightBracket, "Except '}' after 'new' members declaration'");
+
+        return new NewExpr(members.Values);
     }
 
     private ParseException Error(Token token, string message)

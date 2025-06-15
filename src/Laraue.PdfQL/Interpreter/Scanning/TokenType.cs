@@ -34,5 +34,7 @@ public enum TokenType
     Null,
     NextPipeline,
     
+    New,
+    
     Eof,
 }

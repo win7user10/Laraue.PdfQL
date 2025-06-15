@@ -1,5 +1,7 @@
-﻿using Laraue.PdfQL;
+﻿using System.Linq.Expressions;
+using Laraue.PdfQL;
 using Laraue.PdfQL.Interpreter.DelegateCompiling;
+using Laraue.PdfQL.Interpreter.DelegateCompiling.Expressions;
 using Laraue.PdfQL.PdfObjects;
 using Laraue.PdfQL.PdfObjects.Serializing;
 
@@ -224,9 +226,15 @@ public class QueryTests
     [Fact]
     public void Map_ToNewObjectType_Success()
     {
+        var t = new { Name = "Table" };
+        
+        Expression<Func<PdfTableRow, object>> asd = (row) => new { Name = "Table" };
+        
         var pdfql = "select(tables)->map(table => new { Name = 'Table', Object = table })";
         
-        var result = _pdfqlExecutor.ExecutePdfql<List<object>>(pdfql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
+        
+        var jsonObject = _serializer.ToJsonObject(result);
     }
 
     private PdfDocument OpenPdf(string name)

@@ -1,7 +1,9 @@
-﻿using System.Linq.Expressions;
+﻿using System.Dynamic;
+using System.Linq.Expressions;
 using System.Text;
 using Laraue.PdfQL.Interpreter.Parsing.Expressions;
 using Laraue.PdfQL.Interpreter.Scanning;
+using BindingFlags = System.Reflection.BindingFlags;
 
 namespace Laraue.PdfQL.Interpreter.DelegateCompiling.Expressions;
 
@@ -53,6 +55,7 @@ public class TranslatorImpl
             MemberAccessExpr memberAccessExpr => MemberAccessExpression(memberAccessExpr),
             VariableExpr variableExpr => VariableExpression(variableExpr),
             LiteralExpr literalExpr => LiteralExpression(literalExpr),
+            NewExpr memberInitExpr => NewExpression(memberInitExpr),
             _ => throw new NotImplementedException(expr.GetType().ToString())
         };
     }
@@ -188,6 +191,43 @@ public class TranslatorImpl
     private Expression? LiteralExpression(LiteralExpr expr)
     {
         return System.Linq.Expressions.Expression.Constant(expr.Value);
+    }
+    
+    private Expression? NewExpression(NewExpr expr)
+    {
+        var memberExpressions = new Dictionary<MemberInitMember, Expression>();
+        
+        foreach (var member in expr.Members)
+        {
+            var initExpression = Expression(member.InitExpression);
+            if (initExpression == null)
+            {
+                return null;
+            }
+
+            memberExpressions.Add(member, initExpression);
+        }
+        
+        var propertyTypes = expr.Members
+            .ToDictionary(m => m.Token.Lexeme!, m => memberExpressions[m].Type);
+
+        var anonymousType = AnonymousTypeBuilder.CreateType(propertyTypes);
+        var constructor = anonymousType.GetConstructor(Type.EmptyTypes)!;
+        var newAnonymousObjectExpression = System.Linq.Expressions.Expression.New(constructor, []);
+
+        var bindings = new List<MemberBinding>();
+        foreach (var memberExpression in memberExpressions)
+        {
+            var property = anonymousType.GetProperty(memberExpression.Key.Token.Lexeme!)!;
+            var binding = System.Linq.Expressions.Expression.Bind(property, memberExpression.Value);
+            bindings.Add(binding);
+        }
+
+        var memberInit = System.Linq.Expressions.Expression.MemberInit(
+            newAnonymousObjectExpression,
+            bindings);
+
+        return memberInit;
     }
 
     private ExpressionType GetExpressionType(TokenType tokenType)
