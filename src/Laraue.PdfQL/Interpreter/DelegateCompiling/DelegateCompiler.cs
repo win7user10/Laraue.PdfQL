@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using Laraue.PdfQL.Interpreter.DelegateCompiling.Expressions;
-using Laraue.PdfQL.Interpreter.Parsing;
 using Laraue.PdfQL.Interpreter.Parsing.Expressions;
 using Laraue.PdfQL.Interpreter.Parsing.Stages;
 using Laraue.PdfQL.PdfObjects;
@@ -22,6 +19,8 @@ public class DelegateCompiler : IDelegateCompiler
 
 internal class DelegateCompilerImpl
 {
+    private static long _runNumber = 0;
+    
     private readonly Stage[] _stages;
     private Type _currentType;
     
@@ -29,12 +28,18 @@ internal class DelegateCompilerImpl
     private Func<PdfDocument, object?> _result;
 
     private readonly ExpressionCompiler _expressionCompiler = new();
+    private readonly AnonymousTypeRegistry _registry;
 
     public DelegateCompilerImpl(Stage[] stages)
     {
         _stages = stages;
         _currentType = typeof(PdfDocument);
         _result = document => document;
+        
+        
+        var runNumber = Interlocked.Increment(ref _runNumber);
+        var runtimeModuleName = $"PdfQL_{runNumber}";
+        _registry = new AnonymousTypeRegistry(runtimeModuleName);
     }
 
     public DelegateCompilingResult Compile()
@@ -301,7 +306,8 @@ internal class DelegateCompilerImpl
         var containerElementType = containerType.GenericTypeArguments[0];
         var compileResult = _expressionCompiler.Compile(projection, new ExpressionCompilerContext
         {
-            ParameterTypes = { containerElementType }
+            ParameterTypes = { containerElementType },
+            AnonymousTypeRegistry = _registry
         });
 
         if (compileResult.HasErrors)

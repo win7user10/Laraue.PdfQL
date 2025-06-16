@@ -1,15 +1,16 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 using Python.Runtime;
 
-namespace Laraue.PdfQL.Interpreter.DelegateCompiling.Expressions;
+namespace Laraue.PdfQL.Interpreter.DelegateCompiling;
 
 public static class AnonymousTypeBuilder
 {
-    public static Type CreateType(Dictionary<string, Type> propertyTypes)
+    public static Type CreateType(string moduleName, string name, ReadOnlyDictionary<string, Type> propertyTypes)
     {
-        var tb = GetTypeBuilder();
+        var tb = GetTypeBuilder(moduleName, name);
         tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
         foreach (var propertyType in propertyTypes)
@@ -19,12 +20,12 @@ public static class AnonymousTypeBuilder
         return objectType;
     }
     
-    private static TypeBuilder GetTypeBuilder()
+    private static TypeBuilder GetTypeBuilder(string moduleName, string name)
     {
-        var typeSignature = "MyDynamicType";
+        var typeSignature = name;
         var an = new AssemblyName(typeSignature);
         var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
-        var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+        var moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
         var tb = moduleBuilder.DefineType(typeSignature,
             TypeAttributes.Public |
             TypeAttributes.Class |

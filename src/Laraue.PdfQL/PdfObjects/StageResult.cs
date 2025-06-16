@@ -22,6 +22,8 @@ public class StageResult : IEnumerable<object>
         return GetEnumerator();
     }
 
+    public object this[int i] => _values[i];
+
     public override string ToString()
     {
         var sb = new StringBuilder($"PdfContainer[{_values.Length}]");

@@ -1,9 +1,7 @@
-﻿using System.Dynamic;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Text;
 using Laraue.PdfQL.Interpreter.Parsing.Expressions;
 using Laraue.PdfQL.Interpreter.Scanning;
-using BindingFlags = System.Reflection.BindingFlags;
 
 namespace Laraue.PdfQL.Interpreter.DelegateCompiling.Expressions;
 
@@ -209,9 +207,10 @@ public class TranslatorImpl
         }
         
         var propertyTypes = expr.Members
-            .ToDictionary(m => m.Token.Lexeme!, m => memberExpressions[m].Type);
+            .ToDictionary(m => m.Token.Lexeme!, m => memberExpressions[m].Type)
+            .AsReadOnly();
 
-        var anonymousType = AnonymousTypeBuilder.CreateType(propertyTypes);
+        var anonymousType = _translationContext.AnonymousTypeRegistry.GetAnonymousType(new AnonymousTypeProperties(propertyTypes));
         var constructor = anonymousType.GetConstructor(Type.EmptyTypes)!;
         var newAnonymousObjectExpression = System.Linq.Expressions.Expression.New(constructor, []);
 

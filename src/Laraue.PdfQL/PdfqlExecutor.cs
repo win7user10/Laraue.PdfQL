@@ -10,7 +10,7 @@ public class PdfqlExecutor : IPdfqlExecutor
 {
     private readonly Scanner _scanner;
     private readonly Parser _parser;
-    private readonly DelegateCompiler _delegateCompiler;
+    private readonly DelegateCompiler _compiler;
 
     /// <summary>
     /// Initializes <see cref="PdfqlExecutor"/>.
@@ -19,7 +19,7 @@ public class PdfqlExecutor : IPdfqlExecutor
     {
         _scanner = new Scanner();
         _parser = new Parser();
-        _delegateCompiler = new DelegateCompiler();
+        _compiler = new DelegateCompiler();
     }
 
     /// <inheritdoc />
@@ -100,7 +100,8 @@ public class PdfqlExecutor : IPdfqlExecutor
             return new GetCSharpDelegateResult { Errors = errors };
         }
         
-        var delegateCompilingResult = _delegateCompiler.Compile(parseResult.Stages.ToArray());
+        var delegateCompiler = new DelegateCompiler();
+        var delegateCompilingResult = delegateCompiler.Compile(parseResult.Stages.ToArray());
         if (delegateCompilingResult.HasErrors)
         {
             foreach (var compileError in delegateCompilingResult.Errors)

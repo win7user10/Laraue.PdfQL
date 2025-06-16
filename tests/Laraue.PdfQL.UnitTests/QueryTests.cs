@@ -226,13 +226,9 @@ public class QueryTests
     [Fact]
     public void Map_ToNewObjectType_Success()
     {
-        var t = new { Name = "Table" };
-        
-        Expression<Func<PdfTableRow, object>> asd = (row) => new { Name = "Table" };
-        
         var pdfql = "select(tables)->map(table => new { Name = 'Table', Object = table })";
         
-        var result = _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf);
+        var result = _pdfqlExecutor.ExecutePdfql<StageResult>(pdfql, _invoiceSamplePdf);
         
         var jsonObject = _serializer.ToJsonObject(result);
     }
