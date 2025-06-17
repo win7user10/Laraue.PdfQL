@@ -226,11 +226,30 @@ public class QueryTests
     [Fact]
     public void Map_ToNewObjectType_Success()
     {
-        var pdfql = "select(tables)->map(table => new { Name = 'Table', Object = table })";
+        var pdfql = "select(tableRows)->map(row => new { Type = 'Row', Object = new { Cell1 = row.GetCell(1), Cell2 = row.GetCell(2) } })";
         
         var result = _pdfqlExecutor.ExecutePdfql<StageResult>(pdfql, _invoiceSamplePdf);
+
+        var resultItems = result.ToArray();
         
-        var jsonObject = _serializer.ToJsonObject(result);
+        Assert.Equal(17, resultItems.Length);
+        
+        var firstItem = resultItems[0];
+        var secondItem = resultItems[0];
+        
+        var firstItemType = firstItem.GetType();
+        
+        Assert.Equal(firstItemType, secondItem.GetType());
+        Assert.Equal("PdfQLAnonymousType_2", firstItemType.Name);
+
+        var definedProperties = firstItemType.GetProperties();
+        Assert.Equal(2, definedProperties.Length);
+        
+        Assert.Equal(typeof(string), definedProperties[0].PropertyType);
+        Assert.Equal("Type", definedProperties[0].Name);
+        
+        Assert.Equal("PdfQLAnonymousType_1", definedProperties[1].PropertyType.Name);
+        Assert.Equal("Object", definedProperties[1].Name);
     }
 
     private PdfDocument OpenPdf(string name)

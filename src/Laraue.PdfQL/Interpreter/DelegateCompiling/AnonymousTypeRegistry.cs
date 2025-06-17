@@ -2,17 +2,29 @@
 
 namespace Laraue.PdfQL.Interpreter.DelegateCompiling;
 
+/// <summary>
+/// The storage for the PdfQL anonymous types.
+/// </summary>
 public class AnonymousTypeRegistry
 {
     private readonly string _moduleName;
     private readonly HashSet<AnonymousTypeProperties> _declaredProperties = new ();
     private readonly Dictionary<AnonymousTypeProperties, Type> _anonymousClassNames = new ();
 
+    /// <summary>
+    /// Initializes a new instance.
+    /// </summary>
+    /// <param name="moduleName"></param>
     public AnonymousTypeRegistry(string moduleName)
     {
         _moduleName = moduleName;
     }
     
+    /// <summary>
+    /// Returns new anonymous types or returns existing.
+    /// </summary>
+    /// <param name="anonymousTypeProperties"></param>
+    /// <returns></returns>
     public Type GetAnonymousType(AnonymousTypeProperties anonymousTypeProperties)
     {
         if (_declaredProperties.Add(anonymousTypeProperties))
@@ -26,12 +38,21 @@ public class AnonymousTypeRegistry
     }
 }
 
+/// <summary>
+/// Properties of anonymous type.
+/// </summary>
 public class AnonymousTypeProperties : ReadOnlyDictionary<string, Type>
 {
-    public AnonymousTypeProperties(ReadOnlyDictionary<string, Type> properties) : base(properties)
+    /// <summary>
+    /// Initializes a new instance.
+    /// </summary>
+    /// <param name="properties"></param>
+    public AnonymousTypeProperties(IDictionary<string, Type> properties)
+        : base(properties)
     {
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         var hashCode = 0;
@@ -45,6 +66,7 @@ public class AnonymousTypeProperties : ReadOnlyDictionary<string, Type>
         return hashCode;
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         if (obj is not AnonymousTypeProperties anonymousTypeProperties)

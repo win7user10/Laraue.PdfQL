@@ -15,7 +15,7 @@ LambdaExpression
 
 FirstOrDefault examples
 1. Find a table cell with the text 'Alex'. Returns ```null``` if not found.
-```csharp
-select(tableCells) // PdfTableCell[]
-    ->firstOrDefault((item) => item.Text() == 'Alex') // PdfTableCell?
-```
+    ```csharp
+    select(tableCells) // PdfTableCell[]
+        ->firstOrDefault((item) => item.Text() == 'Alex') // PdfTableCell?
+    ```

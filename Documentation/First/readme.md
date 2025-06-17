@@ -16,7 +16,7 @@ LambdaExpression
 
 First examples
 1. Find a table cell with the text 'Alex'. Throws when not found.
-```csharp
-select(tableCells) // PdfTableCell[]
-    ->first((item) => item.Text() == 'Alex') // PdfTableCell
-```
+    ```csharp
+    select(tableCells) // PdfTableCell[]
+        ->first((item) => item.Text() == 'Alex') // PdfTableCell
+    ```

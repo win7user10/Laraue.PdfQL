@@ -138,7 +138,7 @@ public sealed class Scanner : IScanner
         
         private void AddIdentifier()
         {
-            while (PopNextCharIf(IsAlpha))
+            while (PopNextCharIf(ch => IsAlpha(ch) || IsDigit(ch)))
             {
             }
             

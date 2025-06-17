@@ -6,8 +6,18 @@ using Python.Runtime;
 
 namespace Laraue.PdfQL.Interpreter.DelegateCompiling;
 
+/// <summary>
+/// Allows to create bew types in the runtime.
+/// </summary>
 public static class AnonymousTypeBuilder
 {
+    /// <summary>
+    /// Create the new type in passed namespace with the specified properties. 
+    /// </summary>
+    /// <param name="moduleName"></param>
+    /// <param name="name"></param>
+    /// <param name="propertyTypes"></param>
+    /// <returns></returns>
     public static Type CreateType(string moduleName, string name, ReadOnlyDictionary<string, Type> propertyTypes)
     {
         var tb = GetTypeBuilder(moduleName, name);
