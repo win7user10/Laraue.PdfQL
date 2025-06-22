@@ -131,6 +131,29 @@ public class QueryTests
     }
     
     [Fact]
+    public void Skip_Elements_Success()
+    {
+        var pdfql = "select(tableCells)->skip(3)";
+
+        var result = _pdfqlExecutor.ExecutePdfql<StageResult<PdfTableCell>>(pdfql, _invoiceSamplePdf);
+
+        Assert.Equal(22, result.Count);
+        Assert.Equal("123 Somewhere St, Melbourne VIC 3000", result[0].Text());
+    }
+    
+    [Fact]
+    public void Take_Elements_Success()
+    {
+        var pdfql = "select(tableCells)->take(4)";
+
+        var result = _pdfqlExecutor.ExecutePdfql<StageResult<PdfTableCell>>(pdfql, _invoiceSamplePdf);
+
+        Assert.Equal(4, result.Count);
+        Assert.Equal("Denny Gunawan", result[0].Text());
+        Assert.Equal("123 Somewhere St, Melbourne VIC 3000", result[3].Text());
+    }
+    
+    [Fact]
     public void Filter_ByText_ReturnsFilteredSources()
     {
         var pdfql = "select(tableCells)->filter(item => item.Text() == 'Denny Gunawan')";

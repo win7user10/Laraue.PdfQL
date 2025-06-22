@@ -71,6 +71,12 @@ internal class DelegateCompilerImpl
                     case FirstOrDefaultStage firstOrDefaultStage:
                         FirstOrDefaultStage(firstOrDefaultStage);
                         break;
+                    case SkipStage skipStage:
+                        SkipStage(skipStage);
+                        break;
+                    case TakeStage takeStage:
+                        TakeStage(takeStage);
+                        break;
                     default:
                         throw new NotSupportedException($"Unsupported stage: {stage.GetType().Name}");
                 }
@@ -168,7 +174,24 @@ internal class DelegateCompilerImpl
         var method = FindGenericMethod(GetType(), name, genericParameters, parameters);
         if (method == null)
         {
-            throw CompilingError($"Method {name} is not found", stage);
+            var sb = new StringBuilder($"Compiler does not contain a method for call '{name}");
+            if (genericParameters.Length > 0)
+            {
+                sb.Append("<");
+                sb.Append(string.Join(", ", genericParameters.Select(p => p.Name)));
+                sb.Append(">");
+            }
+
+            if (parameters.Length > 0)
+            {
+                sb.Append("(");
+                sb.Append(string.Join(", ", parameters.Select(p => p.GetType().Name)));
+                sb.Append(")");
+            }
+
+            sb.Append("'.");
+            
+            throw CompilingError(sb.ToString(), stage);
         }
         
         method.Invoke(this, parameters);
@@ -263,10 +286,11 @@ internal class DelegateCompilerImpl
         if (expression == null)
             return;
         
-        var method = GetType().GetMethod(nameof(ApplyMapToEachContainerElement), BindingFlags.NonPublic | BindingFlags.Instance)!;
-        var genericMethod = method.MakeGenericMethod(expression.Parameters[0].Type, expression.ReturnType);
-        
-        genericMethod.Invoke(this, [expression.Compile(), stage]);
+        CallInstanceMethod(
+            nameof(ApplyMapToEachContainerElement),
+            [expression.Parameters[0].Type, expression.ReturnType],
+            [expression.Compile(), stage],
+            stage);
     }
     
     private void ApplyMapToEachContainerElement<TContainerElement, TResult>(Func<TContainerElement, TResult> @delegate, Stage stage)
@@ -283,6 +307,50 @@ internal class DelegateCompilerImpl
             
             return nextResult;
         }, stage);
+    }
+    
+    private void SkipStage(SkipStage stage)
+    {
+        if (stage.Count <= 0)
+        {
+            throw CompilingError("Positive skip value excepted", stage);
+        }
+
+        var stageResultType = GetStageResultTypeOrThrow(stage);
+
+        CallInstanceMethod(
+            nameof(ApplySkip),
+            [stageResultType],
+            [stage.Count, stage],
+            stage);
+    }
+    
+    private void ApplySkip<TContainerElement>(int count, Stage stage)
+        where TContainerElement : PdfObject
+    {
+        AppendStageDelegate<TContainerElement, TContainerElement>(elements => elements.Skip(count).ToList(), stage);
+    }
+    
+    private void TakeStage(TakeStage stage)
+    {
+        if (stage.Count <= 0)
+        {
+            throw CompilingError("Positive skip value excepted", stage);
+        }
+
+        var stageResultType = GetStageResultTypeOrThrow(stage);
+
+        CallInstanceMethod(
+            nameof(ApplyTake),
+            [stageResultType],
+            [stage.Count, stage],
+            stage);
+    }
+    
+    private void ApplyTake<TContainerElement>(int count, Stage stage)
+        where TContainerElement : PdfObject
+    {
+        AppendStageDelegate<TContainerElement, TContainerElement>(elements => elements.Take(count).ToList(), stage);
     }
 
     private LambdaExpression? CompileLambda<TStage>(TStage stage, Func<TStage, Expr> getLambdaExpression)
@@ -400,7 +468,7 @@ internal class DelegateCompilerImpl
             var collection = resultRef(document);
             if (collection is not IEnumerable<T> enumerable)
             {
-                throw new PdfqlRuntimeException($"Collection was excepted");
+                throw new PdfqlRuntimeException("Collection was excepted");
             }
 
             return getElement(enumerable);
@@ -446,6 +514,17 @@ internal class DelegateCompilerImpl
         return type.GenericTypeArguments[0];
     }
     
+    private Type GetStageResultTypeOrThrow(Stage stage)
+    {
+        var stageResultType = GetStageResultType(_currentType);
+        if (stageResultType is null)
+        {
+            throw CompilingError("Call on collection excepted", stage);
+        }
+        
+        return stageResultType;
+    }
+    
     private void AppendStageDelegate<TExceptedType, TResult>(Func<TExceptedType, TResult> selector, Stage stage)
         where TResult : class
     {
@@ -461,7 +540,7 @@ internal class DelegateCompilerImpl
 
             if (temp is not TExceptedType exceptedType)
             {
-                throw new PdfqlRuntimeException($"Method is not exists on the object of type {temp.GetType()}");
+                throw new PdfqlRuntimeException($"Method is not exists on the object of type: {temp?.GetType()}");
             }
 
             return selector(exceptedType);

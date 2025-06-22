@@ -87,6 +87,12 @@ internal class ParserImpl
                 case Parsing.Stages.FirstOrDefaultStage.Name:
                     stages.Add(FirstOrDefaultStage());
                     break;
+                case Parsing.Stages.SkipStage.Name:
+                    stages.Add(SkipStage());
+                    break;
+                case Parsing.Stages.TakeStage.Name:
+                    stages.Add(TakeStage());
+                    break;
                 default:
                     throw Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'");
             };
@@ -154,6 +160,20 @@ internal class ParserImpl
             filter = Equality();
 
         return new FirstOrDefaultStage(filter);
+    }
+    
+    private SkipStage SkipStage()
+    {
+        var value = Consume(TokenType.Integer, "'Skip' except integer argument.");
+
+        return new SkipStage((int)value.Literal);
+    }
+    
+    private TakeStage TakeStage()
+    {
+        var value = Consume(TokenType.Integer, "'Take' except integer argument.");
+
+        return new TakeStage((int)value.Literal);
     }
 
     private PdfElement ConsumePdfSelector()

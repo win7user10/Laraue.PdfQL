@@ -48,6 +48,6 @@ Stages documentation
 [Filter](Filter)  
 [Take](Take)  
 [Skip](Skip)  
-[Single](Single) - Not implemented  
-[First](First) - Not implemented  
+[Single](Single)  
+[First](First)  
 [FirstOrDefault](FirstOrDefault)  
