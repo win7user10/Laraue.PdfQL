@@ -46,8 +46,8 @@ Stages documentation
 [SelectMany](SelectMany)  
 [Map](Map)  
 [Filter](Filter)  
-Take - Not implemented  
-Skip - Not implemented  
-[Single](Single)  
-[First](First)  
+[Take](Take)  
+[Skip](Skip)  
+[Single](Single) - Not implemented  
+[First](First) - Not implemented  
 [FirstOrDefault](FirstOrDefault)  
