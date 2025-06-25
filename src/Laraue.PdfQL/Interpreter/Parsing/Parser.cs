@@ -82,6 +82,7 @@ internal class ParserImpl
             
             stage.StartPosition = startPosition;
             stage.EndPosition = _current;
+            stages.Add(stage);
             
             Consume(TokenType.RightParentheses, "')' excepted after stage definition.");
             if (!Match(TokenType.NextPipeline))
