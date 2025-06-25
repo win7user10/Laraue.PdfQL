@@ -83,7 +83,11 @@ public class PdfqlExecutor : IPdfqlExecutor
         {
             foreach (var scanError in scanResult.Errors)
             {
-                errors.Add(new PsqlCompileError { Message = $"Position {scanError.Position}: syntax error {scanError.Error}" });
+                errors.Add(new PsqlCompileError
+                {
+                    Message = $"Position {scanError.Position}: syntax error {scanError.Error}",
+                    StartPosition = scanError.Position,
+                });
             }
             
             return new GetCSharpDelegateResult { Errors = errors };
@@ -94,7 +98,11 @@ public class PdfqlExecutor : IPdfqlExecutor
         {
             foreach (var parseError in parseResult.Errors)
             {
-                errors.Add(new PsqlCompileError { Message = $"Syntax error position {parseError.Position} on token '{parseError.Token.Lexeme}'. {parseError.Error}" });
+                errors.Add(new PsqlCompileError
+                {
+                    Message = $"Syntax error position {parseError.Position} on token '{parseError.Token.Lexeme}'. {parseError.Error}",
+                    StartPosition = parseError.Position,
+                });
             }
             
             return new GetCSharpDelegateResult { Errors = errors };
@@ -106,7 +114,11 @@ public class PdfqlExecutor : IPdfqlExecutor
         {
             foreach (var compileError in delegateCompilingResult.Errors)
             {
-                errors.Add(new PsqlCompileError { Message = $"Compile error on stage '{compileError.Stage.GetType().Name}' : {compileError.Error}" });
+                errors.Add(new PsqlCompileError
+                {
+                    Message = $"Compile error on stage '{compileError.Stage.GetType().Name}' : {compileError.Error}",
+                    StartPosition = compileError.Stage.StartPosition
+                });
             }
         }
         

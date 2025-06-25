@@ -61,41 +61,27 @@ internal class ParserImpl
         
         while (Match(TokenType.Identifier))
         {
+            var startPosition = _current;
+            
             var stageName = Previous();
             Consume(TokenType.LeftParentheses, "'(' excepted after stage definition.");
 
-            switch (stageName.Lexeme)
+            Stage stage = stageName.Lexeme switch
             {
-                case Parsing.Stages.SelectStage.Name:
-                    stages.Add(SelectStage());
-                    break;
-                case Parsing.Stages.FilterStage.Name:
-                    stages.Add(FilterStage());
-                    break;
-                case Parsing.Stages.SelectManyStage.Name:
-                    stages.Add(SelectManyStage());
-                    break;
-                case Parsing.Stages.MapStage.Name:
-                    stages.Add(MapStage());
-                    break;
-                case Parsing.Stages.SingleStage.Name:
-                    stages.Add(SingleStage());
-                    break;
-                case Parsing.Stages.FirstStage.Name:
-                    stages.Add(FirstStage());
-                    break;
-                case Parsing.Stages.FirstOrDefaultStage.Name:
-                    stages.Add(FirstOrDefaultStage());
-                    break;
-                case Parsing.Stages.SkipStage.Name:
-                    stages.Add(SkipStage());
-                    break;
-                case Parsing.Stages.TakeStage.Name:
-                    stages.Add(TakeStage());
-                    break;
-                default:
-                    throw Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'");
+                Parsing.Stages.SelectStage.Name => SelectStage(),
+                Parsing.Stages.FilterStage.Name => FilterStage(),
+                Parsing.Stages.SelectManyStage.Name => SelectManyStage(),
+                Parsing.Stages.MapStage.Name => MapStage(),
+                Parsing.Stages.SingleStage.Name => SingleStage(),
+                Parsing.Stages.FirstStage.Name => FirstStage(),
+                Parsing.Stages.FirstOrDefaultStage.Name => FirstOrDefaultStage(),
+                Parsing.Stages.SkipStage.Name => SkipStage(),
+                Parsing.Stages.TakeStage.Name => TakeStage(),
+                _ => throw Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'"),
             };
+            
+            stage.StartPosition = startPosition;
+            stage.EndPosition = _current;
             
             Consume(TokenType.RightParentheses, "')' excepted after stage definition.");
             if (!Match(TokenType.NextPipeline))

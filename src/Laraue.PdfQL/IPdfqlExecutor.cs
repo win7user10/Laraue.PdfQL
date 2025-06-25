@@ -40,18 +40,45 @@ public interface IPdfqlExecutor
     PSqlSyntaxCheckResult CheckSyntax(string pdfql);
 }
 
+/// <summary>
+/// Result of PdfQL executing.
+/// </summary>
 public class PsqlExecutionResult : PSqlSyntaxCheckResult
 {
+    /// <summary>
+    /// Object that PdfQL returned.
+    /// </summary>
     public object? Result { get; set; }
 }
 
+/// <summary>
+/// Result of PdfQL syntax check.
+/// </summary>
 public class PSqlSyntaxCheckResult
 {
+    /// <summary>
+    /// List of errors if found.
+    /// </summary>
     public List<PsqlCompileError> Errors { get; set; } = new ();
+    
+    /// <summary>
+    /// Did any error occur.
+    /// </summary>
     public bool HasErrors => Errors.Any();
 }
 
+/// <summary>
+/// Error that happened in the compile time.
+/// </summary>
 public class PsqlCompileError
 {
+    /// <summary>
+    /// Text of error.
+    /// </summary>
     public required string Message { get; init; }
+    
+    /// <summary>
+    /// Start token of the query where the error occured.
+    /// </summary>
+    public required int StartPosition { get; init; }
 }
