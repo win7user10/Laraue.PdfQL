@@ -14,13 +14,9 @@ public class PdfqlCompileException : Exception
 
     private static string GetErrorMessage(List<PsqlCompileError> errors)
     {
-        var sb = new StringBuilder("PSql compile error:");
-
-        foreach (var error in errors)
-        {
-            sb.AppendLine();
-            sb.Append(error.Message);
-        }
+        var sb = new StringBuilder();
+        
+        sb.AppendJoin(Environment.NewLine, errors.Select(e => e.Message));
 
         return sb.ToString();
     }

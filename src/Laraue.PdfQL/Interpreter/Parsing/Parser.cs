@@ -90,6 +90,11 @@ internal class ParserImpl
                 break;
             }
         }
+
+        if (!IsParseCompleted)
+        {
+            throw Error(Peek(), "Excepted stage definition or end of pipeline.");
+        }
         
         return stages;
     }

@@ -274,6 +274,16 @@ public class QueryTests
         Assert.Equal("PdfQLAnonymousType_1", definedProperties[1].PropertyType.Name);
         Assert.Equal("Object", definedProperties[1].Name);
     }
+    
+    [Fact]
+    public void UnknownSyntax_Always_Throws()
+    {
+        var pdfql = "select(tableCells)abcd";
+        
+        var ex = Assert.Throws<PdfqlCompileException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
+        
+        Assert.Equal("Syntax error position 4 on token 'abcd'. Excepted stage definition or end of pipeline.", ex.Message);
+    }
 
     private PdfDocument OpenPdf(string name)
     {
