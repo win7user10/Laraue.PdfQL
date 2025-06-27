@@ -37,7 +37,13 @@ public sealed class Scanner : IScanner
                 ScanToken();
             }
             
-            _tokens.Add(new Token { TokenType = TokenType.Eof, Lexeme = null });
+            _tokens.Add(new Token
+            {
+                TokenType = TokenType.Eof,
+                Lexeme = null,
+                StartPosition = _startPosition,
+                EndPosition = _currentPosition
+            });
             
             return new ScanResult
             {
@@ -201,7 +207,9 @@ public sealed class Scanner : IScanner
             {
                 TokenType = tokenType,
                 Lexeme = lexeme,
-                Literal = literal
+                Literal = literal,
+                StartPosition = _startPosition + 1,
+                EndPosition = _currentPosition + 1
             });
         }
         

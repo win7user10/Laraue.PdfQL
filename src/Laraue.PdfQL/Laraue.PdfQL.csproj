@@ -12,7 +12,7 @@
         <PackageTags>Query language;PDF extrator;PDF manipulating</PackageTags>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Nullable>enable</Nullable>
-        <Version>0.1.3</Version>
+        <Version>0.1.4</Version>
         <IsPackable>true</IsPackable>
     </PropertyGroup>
 

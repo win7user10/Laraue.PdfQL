@@ -100,7 +100,7 @@ public class PdfqlExecutor : IPdfqlExecutor
             {
                 errors.Add(new PsqlCompileError
                 {
-                    Message = $"Syntax error position {parseError.Position} on token '{parseError.Token.Lexeme}'. {parseError.Error}",
+                    Message = $"Syntax error on token '{parseError.Token.Lexeme}'. {parseError.Error}",
                     StartPosition = parseError.Position,
                 });
             }
@@ -128,7 +128,7 @@ public class PdfqlExecutor : IPdfqlExecutor
 
     private class GetCSharpDelegateResult
     {
-        public Func<PdfDocument, object>? Delegate { get; init; }
+        public Func<PdfDocument, object?>? Delegate { get; init; }
         public required List<PsqlCompileError> Errors { get; init; }
     }
 }

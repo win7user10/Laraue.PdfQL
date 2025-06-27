@@ -93,7 +93,7 @@ internal class ParserImpl
 
         if (!IsParseCompleted)
         {
-            throw Error(Peek(), "Excepted stage definition or end of pipeline.");
+            throw Error(Peek(), "Excepted next stage definition or end of pipeline.");
         }
         
         return stages;
@@ -390,7 +390,7 @@ internal class ParserImpl
 
     private ParseException Error(Token token, string message)
     {
-        _errors.Add(new ParseError { Error = message, Token = token, Position = _current });
+        _errors.Add(new ParseError { Error = message, Token = token, Position = token.StartPosition });
 
         return new ParseException();
     }
@@ -428,4 +428,6 @@ internal class ParserImpl
     }
     
     private Token Previous() => _tokens[_current - 1];
+    
+    private bool HasPrevious() => _current > 0;
 }

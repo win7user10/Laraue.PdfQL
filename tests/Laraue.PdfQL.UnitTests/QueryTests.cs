@@ -65,7 +65,8 @@ public class QueryTests
 
         var error = Assert.Single(ex.Errors);
         
-        Assert.Equal("Syntax error position 3 on token 'cows'. Excepted 'tables'|'tableRows'|'tableCells'.", error.Message);
+        Assert.Equal("Syntax error on token 'cows'. Excepted 'tables'|'tableRows'|'tableCells'.", error.Message);
+        Assert.Equal(8, error.StartPosition);
     }
     
     [Fact]
@@ -282,7 +283,8 @@ public class QueryTests
         
         var ex = Assert.Throws<PdfqlCompileException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
         
-        Assert.Equal("Syntax error position 4 on token 'abcd'. Excepted stage definition or end of pipeline.", ex.Message);
+        Assert.Equal("Syntax error on token 'abcd'. Excepted next stage definition or end of pipeline.", ex.Message);
+        Assert.Equal(19, ex.Errors[0].StartPosition);
     }
 
     private PdfDocument OpenPdf(string name)
