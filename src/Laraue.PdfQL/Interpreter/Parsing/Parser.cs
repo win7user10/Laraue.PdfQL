@@ -61,8 +61,6 @@ internal class ParserImpl
         
         while (Match(TokenType.Identifier))
         {
-            var startPosition = _current;
-            
             var stageName = Previous();
             Consume(TokenType.LeftParentheses, "'(' excepted after stage definition.");
 
@@ -80,8 +78,11 @@ internal class ParserImpl
                 _ => throw Error(stageName, $"Unknown stage name: '{stageName.Lexeme}'"),
             };
             
-            stage.StartPosition = startPosition;
+            stage.StartPosition = stageName.StartPosition;
+            stage.StartLineNumber = stageName.LineNumber;
             stage.EndPosition = _current;
+            stage.EndLineNumber = Previous().LineNumber;
+            
             stages.Add(stage);
             
             Consume(TokenType.RightParentheses, "')' excepted after stage definition.");
@@ -390,7 +391,11 @@ internal class ParserImpl
 
     private ParseException Error(Token token, string message)
     {
-        _errors.Add(new ParseError { Error = message, Token = token, Position = token.StartPosition });
+        _errors.Add(new ParseError
+        {
+            Error = message,
+            Token = token,
+        });
 
         return new ParseException();
     }

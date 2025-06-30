@@ -14,6 +14,7 @@ public sealed class Scanner : IScanner
         private readonly string _input;
         private int _startPosition;
         private int _currentPosition;
+        private int _lineNumber;
         private readonly List<Token> _tokens = new ();
         private readonly List<ScanError> _errors = new ();
         
@@ -42,7 +43,8 @@ public sealed class Scanner : IScanner
                 TokenType = TokenType.Eof,
                 Lexeme = null,
                 StartPosition = _startPosition,
-                EndPosition = _currentPosition
+                EndPosition = _currentPosition,
+                LineNumber = _lineNumber,
             });
             
             return new ScanResult
@@ -58,8 +60,11 @@ public sealed class Scanner : IScanner
             switch (nextChar)
             {
                 case ' ': break;
-                case '\r': 
-                    PopNextCharIf(c => c == '\n');
+                case '\r':
+                    if (PopNextCharIf(c => c == '\n'))
+                    {
+                        _lineNumber++;
+                    }
                     break;
                 case '\t':
                     break;
@@ -94,7 +99,13 @@ public sealed class Scanner : IScanner
                     else if (IsAlpha(nextChar))
                         AddIdentifier();
                     else
-                        _errors.Add(new ScanError { Position = _currentPosition, Error = $"Unknown character '{nextChar}'."});
+                        _errors.Add(new ScanError
+                        {
+                            StartPosition = _startPosition,
+                            EndPosition = _currentPosition,
+                            Error = $"Unknown character '{nextChar}'.",
+                            LineNumber = _lineNumber
+                        });
                     break;
             }
         }
@@ -111,7 +122,13 @@ public sealed class Scanner : IScanner
 
             if (IsScanCompleted)
             {
-                _errors.Add(new ScanError { Position = _currentPosition, Error = "Unterminated string." });
+                _errors.Add(new ScanError
+                {
+                    StartPosition = _startPosition,
+                    Error = "Unterminated string.",
+                    EndPosition = _currentPosition,
+                    LineNumber = _lineNumber
+                });
             }
 
             // consume last '"'
@@ -208,8 +225,9 @@ public sealed class Scanner : IScanner
                 TokenType = tokenType,
                 Lexeme = lexeme,
                 Literal = literal,
-                StartPosition = _startPosition + 1,
-                EndPosition = _currentPosition + 1
+                StartPosition = _startPosition,
+                EndPosition = _currentPosition,
+                LineNumber = _lineNumber
             });
         }
         

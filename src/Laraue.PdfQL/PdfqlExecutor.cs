@@ -85,8 +85,11 @@ public class PdfqlExecutor : IPdfqlExecutor
             {
                 errors.Add(new PsqlCompileError
                 {
-                    Message = $"Position {scanError.Position}: syntax error {scanError.Error}",
-                    StartPosition = scanError.Position,
+                    Message = $"Position {scanError.StartPosition}: syntax error {scanError.Error}",
+                    StartPosition = scanError.StartPosition,
+                    EndPosition = scanError.EndPosition,
+                    StartLineNumber = scanError.LineNumber,
+                    EndLineNumber = scanError.LineNumber,
                 });
             }
             
@@ -101,7 +104,10 @@ public class PdfqlExecutor : IPdfqlExecutor
                 errors.Add(new PsqlCompileError
                 {
                     Message = $"Syntax error on token '{parseError.Token.Lexeme}'. {parseError.Error}",
-                    StartPosition = parseError.Position,
+                    StartPosition = parseError.Token.StartPosition,
+                    EndPosition = parseError.Token.EndPosition,
+                    StartLineNumber = parseError.Token.LineNumber,
+                    EndLineNumber = parseError.Token.LineNumber
                 });
             }
             
@@ -117,7 +123,10 @@ public class PdfqlExecutor : IPdfqlExecutor
                 errors.Add(new PsqlCompileError
                 {
                     Message = $"Compile error on stage '{compileError.Stage.GetType().Name}' : {compileError.Error}",
-                    StartPosition = compileError.Stage.StartPosition
+                    StartPosition = compileError.Stage.StartPosition,
+                    EndPosition = compileError.Stage.EndPosition,
+                    StartLineNumber = compileError.Stage.StartLineNumber,
+                    EndLineNumber = compileError.Stage.EndLineNumber,
                 });
             }
         }

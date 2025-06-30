@@ -81,4 +81,19 @@ public class PsqlCompileError
     /// Start token of the query where the error occured.
     /// </summary>
     public required int StartPosition { get; init; }
+    
+    /// <summary>
+    /// End token of the query where the error occured.
+    /// </summary>
+    public required int EndPosition { get; init; }
+    
+    /// <summary>
+    /// Start line number of the query where the error occured.
+    /// </summary>
+    public required int StartLineNumber { get; init; }
+    
+    /// <summary>
+    /// End line number of the query where the error occured.
+    /// </summary>
+    public required int EndLineNumber { get; init; }
 }
