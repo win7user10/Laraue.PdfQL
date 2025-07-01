@@ -128,7 +128,7 @@ public class TranslatorImpl
             {
                 _errors.Add(new ExpressionCompileError
                 {
-                    Error = $"Method {methodName} is not found on {Utils.GetReadableTypeName(callee.Type)}",
+                    Error = $"Method '{methodName}' is not exists on type '{Utils.GetReadableTypeName(callee.Type)}'",
                     Token = expr.Method
                 });
                 return null;

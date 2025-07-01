@@ -9,10 +9,10 @@
         <RepositoryType>git</RepositoryType>
         <Authors>Belyanskiy Ilya</Authors>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageTags>Query language;PDF extrator;PDF manipulating</PackageTags>
+        <PackageTags>query language pdf sql manipulating pdfql</PackageTags>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Nullable>enable</Nullable>
-        <Version>0.1.6</Version>
+        <Version>0.1.7</Version>
         <IsPackable>true</IsPackable>
     </PropertyGroup>
 
