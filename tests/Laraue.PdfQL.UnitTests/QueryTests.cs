@@ -65,7 +65,7 @@ public class QueryTests
 
         var error = Assert.Single(ex.Errors);
         
-        Assert.Equal("Syntax error on token 'cows'. Excepted 'tables'|'tableRows'|'tableCells'.", error.Message);
+        Assert.Equal("Syntax error on token 'cows': Excepted 'tables'|'tableRows'|'tableCells'.", error.Message);
         Assert.Equal(7, error.StartPosition);
     }
     
@@ -283,8 +283,23 @@ public class QueryTests
         
         var ex = Assert.Throws<PdfqlCompileException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
         
-        Assert.Equal("Syntax error on token 'abcd'. Excepted next stage definition or end of pipeline.", ex.Message);
+        Assert.Equal("Syntax error on token 'abcd': Excepted next stage definition or end of pipeline.", ex.Message);
         Assert.Equal(18, ex.Errors[0].StartPosition);
+    }
+    
+    [Theory]
+    [InlineData("select(tables)\n->selectMany(tableCells)\n->map((item) => item.GetCell(2))\n->map((item) => item.Text()")]
+    [InlineData("select(tables)\r\n->selectMany(tableCells)\r\n->map((item) => item.GetCell(2))\r\n->map((item) => item.Text()")]
+    public void MultilineSyntax_Always_Throws(string pdfql)
+    {
+        var ex = Assert.Throws<PdfqlCompileException>(() => _pdfqlExecutor.ExecutePdfql(pdfql, _invoiceSamplePdf));
+        
+        var error = Assert.Single(ex.Errors);
+        Assert.Equal("Syntax error: Expected ')' after stage definition.", error.Message);
+        Assert.Equal(3, error.StartLineNumber);
+        Assert.Equal(3, error.EndLineNumber);
+        Assert.Equal(26, error.StartPosition);
+        Assert.Equal(27, error.EndPosition);
     }
 
     private PdfDocument OpenPdf(string name)

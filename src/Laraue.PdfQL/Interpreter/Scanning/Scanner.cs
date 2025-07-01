@@ -12,8 +12,10 @@ public sealed class Scanner : IScanner
     private class ScannerImplementation
     {
         private readonly string _input;
-        private int _startPosition;
-        private int _currentPosition;
+        private int _startAbsolutePosition;
+        private int _startRelativePosition;
+        private int _currentAbsolutePosition;
+        private int _currentRelativePosition;
         private int _lineNumber;
         private readonly List<Token> _tokens = new ();
         private readonly List<ScanError> _errors = new ();
@@ -34,7 +36,8 @@ public sealed class Scanner : IScanner
         {
             while (!IsScanCompleted)
             {
-                _startPosition = _currentPosition;
+                _startAbsolutePosition = _currentAbsolutePosition;
+                _startRelativePosition = _currentRelativePosition;
                 ScanToken();
             }
             
@@ -42,8 +45,8 @@ public sealed class Scanner : IScanner
             {
                 TokenType = TokenType.Eof,
                 Lexeme = null,
-                StartPosition = _startPosition,
-                EndPosition = _currentPosition,
+                StartPosition = _startRelativePosition,
+                EndPosition = _currentRelativePosition,
                 LineNumber = _lineNumber,
             });
             
@@ -62,9 +65,10 @@ public sealed class Scanner : IScanner
                 case ' ': break;
                 case '\r':
                     if (PopNextCharIf(c => c == '\n'))
-                    {
-                        _lineNumber++;
-                    }
+                        ToNextLine();
+                    break;
+                case '\n':
+                    ToNextLine();
                     break;
                 case '\t':
                     break;
@@ -101,13 +105,19 @@ public sealed class Scanner : IScanner
                     else
                         _errors.Add(new ScanError
                         {
-                            StartPosition = _startPosition,
-                            EndPosition = _currentPosition,
+                            StartPosition = _startRelativePosition,
+                            EndPosition = _currentRelativePosition,
                             Error = $"Unknown character '{nextChar}'.",
                             LineNumber = _lineNumber
                         });
                     break;
             }
+        }
+
+        private void ToNextLine()
+        {
+            _lineNumber++;
+            _currentRelativePosition = 0;
         }
         
         private bool IsDigit (char c) => c is >= '0' and <= '9';
@@ -124,9 +134,9 @@ public sealed class Scanner : IScanner
             {
                 _errors.Add(new ScanError
                 {
-                    StartPosition = _startPosition,
+                    StartPosition = _startRelativePosition,
                     Error = "Unterminated string.",
-                    EndPosition = _currentPosition,
+                    EndPosition = _currentRelativePosition,
                     LineNumber = _lineNumber
                 });
             }
@@ -134,7 +144,7 @@ public sealed class Scanner : IScanner
             // consume last '"'
             Advance();
             
-            var value = _input[(_startPosition + 1)..(_currentPosition - 1)];
+            var value = _input[(_startAbsolutePosition + 1)..(_currentAbsolutePosition - 1)];
             AddToken(TokenType.String, value);
         }
 
@@ -156,7 +166,7 @@ public sealed class Scanner : IScanner
             
             AddToken(
                 TokenType.Integer,
-                int.Parse(_input[_startPosition.._currentPosition]));
+                int.Parse(_input[_startAbsolutePosition.._currentAbsolutePosition]));
         }
         
         private void AddIdentifier()
@@ -165,13 +175,14 @@ public sealed class Scanner : IScanner
             {
             }
             
-            var text = _input[_startPosition.._currentPosition];
+            var text = _input[_startAbsolutePosition.._currentAbsolutePosition];
             AddToken(_keywords.GetValueOrDefault(text, TokenType.Identifier));
         }
 
         private char Advance()
         {
-            return _input[_currentPosition++];
+            _currentRelativePosition++;
+            return _input[_currentAbsolutePosition++];
         }
         
         private bool TryPeekNextChar([NotNullWhen(true)] out char? nextChar)
@@ -183,7 +194,7 @@ public sealed class Scanner : IScanner
                 return false;
             }
             
-            nextChar = _input[_currentPosition];
+            nextChar = _input[_currentAbsolutePosition];
             return true;
         }
 
@@ -191,12 +202,12 @@ public sealed class Scanner : IScanner
         {
             inOneChar = null;
             
-            if (_currentPosition + 1 >= _input.Length)
+            if (_currentAbsolutePosition + 1 >= _input.Length)
             {
                 return false;
             }
             
-            inOneChar = _input[_currentPosition + 1];
+            inOneChar = _input[_currentAbsolutePosition + 1];
             return true;
         }
         
@@ -207,30 +218,31 @@ public sealed class Scanner : IScanner
                 return false;
             }
 
-            if (!predicate(_input[_currentPosition]))
+            if (!predicate(_input[_currentAbsolutePosition]))
             {
                 return false;
             }
             
-            _currentPosition++;
+            _currentAbsolutePosition++;
+            _currentRelativePosition++;
             return true;
         }
 
         private void AddToken(TokenType tokenType, object? literal = null)
         {
-            var lexeme = _input[_startPosition.._currentPosition];
+            var lexeme = _input[_startAbsolutePosition.._currentAbsolutePosition];
             
             _tokens.Add(new Token
             {
                 TokenType = tokenType,
                 Lexeme = lexeme,
                 Literal = literal,
-                StartPosition = _startPosition,
-                EndPosition = _currentPosition,
+                StartPosition = _startRelativePosition,
+                EndPosition = _currentRelativePosition,
                 LineNumber = _lineNumber
             });
         }
         
-        private bool IsScanCompleted => _currentPosition >= _input.Length;
+        private bool IsScanCompleted => _currentAbsolutePosition >= _input.Length;
     }
 }

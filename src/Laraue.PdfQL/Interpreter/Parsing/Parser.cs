@@ -62,7 +62,7 @@ internal class ParserImpl
         while (Match(TokenType.Identifier))
         {
             var stageName = Previous();
-            Consume(TokenType.LeftParentheses, "'(' excepted after stage definition.");
+            Consume(TokenType.LeftParentheses, "Expected '(' after stage definition.");
 
             Stage stage = stageName.Lexeme switch
             {
@@ -85,7 +85,7 @@ internal class ParserImpl
             
             stages.Add(stage);
             
-            Consume(TokenType.RightParentheses, "')' excepted after stage definition.");
+            Consume(TokenType.RightParentheses, "Expected ')' after stage definition.");
             if (!Match(TokenType.NextPipeline))
             {
                 break;

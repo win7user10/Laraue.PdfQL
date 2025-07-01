@@ -85,7 +85,7 @@ public class PdfqlExecutor : IPdfqlExecutor
             {
                 errors.Add(new PsqlCompileError
                 {
-                    Message = $"Position {scanError.StartPosition}: syntax error {scanError.Error}",
+                    Message = $"Syntax error: {scanError.Error}",
                     StartPosition = scanError.StartPosition,
                     EndPosition = scanError.EndPosition,
                     StartLineNumber = scanError.LineNumber,
@@ -101,9 +101,13 @@ public class PdfqlExecutor : IPdfqlExecutor
         {
             foreach (var parseError in parseResult.Errors)
             {
+                var token = parseError.Token.Lexeme;
+                
                 errors.Add(new PsqlCompileError
                 {
-                    Message = $"Syntax error on token '{parseError.Token.Lexeme}'. {parseError.Error}",
+                    Message = token is null
+                        ? $"Syntax error: {parseError.Error}"
+                        : $"Syntax error on token '{parseError.Token.Lexeme}': {parseError.Error}",
                     StartPosition = parseError.Token.StartPosition,
                     EndPosition = parseError.Token.EndPosition,
                     StartLineNumber = parseError.Token.LineNumber,
